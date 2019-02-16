@@ -20,6 +20,7 @@ public:
     virtual bool infectable() const; // Default of false (cannot be infected by vomit)
     virtual bool blocksMovement() const; // Default of false (blocks other actors from moving onto it)
     virtual bool blocksProjectiles() const; // Default of false (blocks flames and vomit)
+    virtual bool pitDestructible() const; // Default of false (cannot be destroyed by a pit)
     
     // Accessors
     bool alive() const; // Returns whether this actor is alive
@@ -199,6 +200,65 @@ public:
 private:
     int m_safetyTicks; // Number of safety ticks remaining
     bool m_active; // Whether the landmine is active
+};
+
+/* Person Class Declaration
+ * - Base class for Penelope and citizens
+ * - All people are infectable and have an infection counter
+ * - All people block the movement of other people/zombies
+ * - All people can fall into pits and be destroyed
+ */
+class Person : public Actor {
+public:
+    // Constructor
+    Person(int imageID, int startX, int startY, StudentWorld* stWorld);
+    
+    // Properties
+    virtual bool infectable() const; // People are infectable
+    virtual bool blocksMovement() const; // People block movement
+    virtual bool pitDestructible() const; // People can be destroyed by pits
+    
+    // Accessors
+    int infection() const; // Returns number of ticks this person has been infected
+    
+    // Actions
+    virtual void doSomething(); // Checks if turned into zombie, then call doAction()
+    void resetInfection(); // Uninfects this person
+protected:
+    // Accessors
+    bool infected() const; // Returns whether this person has been infected by vomit
+    
+    // Actions
+    virtual void doAction() = 0; // Makes this person do some action
+private:
+    bool m_infected; // Whether this person has been infected by vomit
+    int m_infection; // Number of ticks person has been infected
+};
+
+/* Penelope Class Declaration
+ * - Arguably the most complicated Actor class in the game!
+ */
+class Penelope : public Person {
+public:
+    Penelope(int startX, int startY, StudentWorld* stWorld);
+    
+    // Accessors
+    int landmines() const; // Returns the number of landmines carried by Penelope
+    int flameCharges() const; // Returns the number of flamethrower charges carried by Penelope
+    int vaccines() const; // Returns the number of vaccines carried by Penelope
+    
+    // Actions
+    void adjustLandmines(int num); // Changes the number of landmines carried by Penelope by num
+    void adjustFlameCharges(int num); // Changes the number of flamethrower charges carried by Penelope by num
+    void adjustVaccines(int num); // Changes the number of vaccines carried by Penelope
+    virtual void destroy(); // Handles when Penelope is killed by fire or zombie
+protected:
+    // Actions
+    virtual void doAction(); // Detects user input and has Penelope act accordingly
+private:
+    int m_landmines; // Number of landmines carried by Penelope
+    int m_flameCharges; // Number of flamethrower charges carried by Penelope
+    int m_vaccines; // Number of vaccines carried by Penelope
 };
 
 #endif // ACTOR_H_
