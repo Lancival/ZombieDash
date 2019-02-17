@@ -132,7 +132,7 @@ void Landmine::destroy() {
     world()->createPit(x, y);
 }
 
-Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound_infect(sound_infect), m_sound_flame(sound_flame), m_score_value(score_value), m_paralyzed(false) {}
+Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value, int step_distance) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound_infect(sound_infect), m_sound_flame(sound_flame), m_score_value(score_value), m_paralyzed(false), m_step_distance(step_distance) {}
 bool Person::blocksMovement() const {return true;}
 bool Person::pitDestructible() const {return true;}
 int Person::infection() const {return m_infection;}
@@ -154,8 +154,31 @@ void Person::destroy() {
     world()->increaseScore(m_score_value);
     // If Person is a citizen create a smart/dumb zombie!!!!!!!!!!!!!!!!!
 }
+bool Person::moveDirection(Direction dir) {
+    int x = getX();
+    int y = getY();
+    switch (dir) {
+        case GraphObject::up:
+            y += m_step_distance;
+            break;
+        case GraphObject::down:
+            y -= m_step_distance;
+            break;
+        case GraphObject::left:
+            x -= m_step_distance;
+            break;
+        case GraphObject::right:
+            x += m_step_distance;
+    }
+    if (world()->isValidDestination(x, y, this)) {
+        setDirection(dir);
+        moveTo(x, y);
+        return true;
+    }
+    return false;
+}
 
-Penelope::Penelope(int startX, int startY, StudentWorld* stWorld) : Person(IID_PLAYER, startX, startY, stWorld, SOUND_PLAYER_DIE, SOUND_PLAYER_DIE, 0), m_landmines(0), m_flameCharges(0), m_vaccines(0) {}
+Penelope::Penelope(int startX, int startY, StudentWorld* stWorld) : Person(IID_PLAYER, startX, startY, stWorld, SOUND_PLAYER_DIE, SOUND_PLAYER_DIE, 0, 4), m_landmines(0), m_flameCharges(0), m_vaccines(0) {}
 bool Penelope::infectable() const {return true;}
 bool Penelope::paralyzed() {return false;}
 int Penelope::landmines() const {return m_landmines;}
@@ -174,23 +197,19 @@ void Penelope::doAction() {
         switch (key) {
             case KEY_PRESS_LEFT:
                 setDirection(GraphObject::left);
-                if (world()->isValidDestination(getX()-4, getY(), this))
-                    moveTo(getX()-4, getY());
+                moveDirection(GraphObject::left);
                 break;
             case KEY_PRESS_RIGHT:
                 setDirection(GraphObject::right);
-                if (world()->isValidDestination(getX()+4, getY(), this))
-                    moveTo(getX()+4, getY());
+                moveDirection(GraphObject::right);
                 break;
             case KEY_PRESS_UP:
                 setDirection(GraphObject::up);
-                if (world()->isValidDestination(getX(), getY()+4, this))
-                    moveTo(getX(), getY()+4);
+                moveDirection(GraphObject::up);
                 break;
             case KEY_PRESS_DOWN:
                 setDirection(GraphObject::down);
-                if (world()->isValidDestination(getX(), getY()-4, this))
-                    moveTo(getX(), getY()-4);
+                moveDirection(GraphObject::down);
                 break;
             case KEY_PRESS_SPACE:
                 if (m_flameCharges > 0) {
@@ -238,30 +257,11 @@ void Penelope::doAction() {
     }
 }
 
-Citizen::Citizen(int startX, int startY, StudentWorld* stWorld) : Person(IID_CITIZEN, startX, startY, stWorld, SOUND_ZOMBIE_BORN, SOUND_CITIZEN_DIE, -1000) {}
+Citizen::Citizen(int startX, int startY, StudentWorld* stWorld) : Person(IID_CITIZEN, startX, startY, stWorld, SOUND_ZOMBIE_BORN, SOUND_CITIZEN_DIE, -1000, 2) {}
 bool Citizen::infectable() const {return true;}
-bool Citizen::moveDirection(Direction dir) {
-    int x = getX();
-    int y = getY();
-    switch (dir) {
-        case GraphObject::up:
-            y += 2;
-            break;
-        case GraphObject::down:
-            y -= 2;
-            break;
-        case GraphObject::left:
-            x -= 2;
-            break;
-        case GraphObject::right:
-            x += 2;
-    }
-    if (world()->isValidDestination(x, y, this)) {
-        setDirection(dir);
-        moveTo(x, y);
-        return true;
-    }
-    return false;
+void Citizen::infect() {
+    Person::infect();
+    world()->playSound(SOUND_CITIZEN_INFECTED);
 }
 void Citizen::doAction() {
     double dist_p = world()->distPenelope(getX(), getY()); // Distance to Penelope
@@ -339,7 +339,7 @@ void Citizen::doAction() {
     // If all else fails, do nothing
 }
 
-Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) : Person(IID_ZOMBIE, startX, startY, stWorld, SOUND_NONE, SOUND_ZOMBIE_DIE, score_value), m_movementPlan(0) {}
+Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) : Person(IID_ZOMBIE, startX, startY, stWorld, SOUND_NONE, SOUND_ZOMBIE_DIE, score_value, 1), m_movementPlan(0) {}
 void Zombie::doAction() {
     // If person in front, vomit on them
     if (m_movementPlan == 0) movementPlan();

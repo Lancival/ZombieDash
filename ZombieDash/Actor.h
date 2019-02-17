@@ -211,7 +211,7 @@ private:
 class Person : public Actor {
 public:
     // Constructor
-    Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value);
+    Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value, int step_distance);
     
     // Properties
     virtual bool blocksMovement() const; // People block movement
@@ -232,6 +232,7 @@ protected:
     // Actions
     virtual void doAction() = 0; // Makes this person do some action
     virtual bool paralyzed(); // Returns whether this person is paralyzed with indecision
+    bool moveDirection(Direction dir); // Attempts to move in Direction dir, returns whether move was successful
 private:
     bool m_infected; // Whether this person has been infected by vomit, always false for zombies
     int m_infection; // Number of ticks person has been infected, always 0 for zombies
@@ -239,6 +240,7 @@ private:
     int m_sound_infect; // Sound to be played when this person is destroyed by infection
     int m_sound_flame; // Sound to be played when this person is destroyed by flames
     bool m_paralyzed; // Whether this person is paralyzed with indecision
+    int m_step_distance; // How far this person moves in a single tick
 };
 
 /* Penelope Class Declaration
@@ -274,6 +276,10 @@ private:
     int m_vaccines; // Number of vaccines carried by Penelope
 };
 
+/* Citizen Class Declaration
+ * - Citizens are infectable
+ * - Citizens run from zombies and follow Penelope
+ */
 class Citizen : public Person {
 public:
     // Constructor
@@ -281,14 +287,19 @@ public:
     
     // Properties
     virtual bool infectable() const; // Citizens are infectable
+    
+    // Actions
+    virtual void infect(); // Citizens also play an infection sound when infected
 protected:
     // Actions
     virtual void doAction(); // Citizens follow Penelope and run from zombies
-private:
-    // Actions
-    bool moveDirection(Direction dir); // Attempts to move in Direction dir, returns whether move was successful
 };
 
+/* Zombie Class Declaration
+ * - Base class for dumb zombies and smart zombies
+ * - All zombies are not infectable
+ * - All zombies have movement plans
+ */
 class Zombie : public Person {
 public:
     // Constructor
