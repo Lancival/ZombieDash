@@ -132,7 +132,7 @@ void Landmine::destroy() {
     world()->createPit(x, y);
 }
 
-Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound, int score_value) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound(sound), m_score_value(score_value), m_paralyzed(false) {}
+Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound_infect(sound_infect), m_sound_flame(sound_flame), m_score_value(score_value), m_paralyzed(false) {}
 bool Person::blocksMovement() const {return true;}
 bool Person::pitDestructible() const {return true;}
 int Person::infection() const {return m_infection;}
@@ -150,12 +150,12 @@ void Person::doSomething() {
 }
 void Person::destroy() {
     setDead();
-    world()->playSound(m_sound);
+    world()->playSound(m_infection >= 500 ? m_sound_infect : m_sound_flame);
     world()->increaseScore(m_score_value);
     // If Person is a citizen create a smart/dumb zombie!!!!!!!!!!!!!!!!!
 }
 
-Penelope::Penelope(int startX, int startY, StudentWorld* stWorld) : Person(IID_PLAYER, startX, startY, stWorld, SOUND_PLAYER_DIE, 0), m_landmines(0), m_flameCharges(0), m_vaccines(0) {}
+Penelope::Penelope(int startX, int startY, StudentWorld* stWorld) : Person(IID_PLAYER, startX, startY, stWorld, SOUND_PLAYER_DIE, SOUND_PLAYER_DIE, 0), m_landmines(0), m_flameCharges(0), m_vaccines(0) {}
 bool Penelope::infectable() const {return true;}
 bool Penelope::paralyzed() {return false;}
 int Penelope::landmines() const {return m_landmines;}
@@ -238,7 +238,7 @@ void Penelope::doAction() {
     }
 }
 
-Citizen::Citizen(int startX, int startY, StudentWorld* stWorld) : Person(IID_CITIZEN, startX, startY, stWorld, SOUND_ZOMBIE_BORN, -1000) {}
+Citizen::Citizen(int startX, int startY, StudentWorld* stWorld) : Person(IID_CITIZEN, startX, startY, stWorld, SOUND_ZOMBIE_BORN, SOUND_CITIZEN_DIE, -1000) {}
 bool Citizen::infectable() const {return true;}
 bool Citizen::moveDirection(Direction dir) {
     int x = getX();
@@ -339,7 +339,7 @@ void Citizen::doAction() {
     // If all else fails, do nothing
 }
 
-Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) : Person(IID_ZOMBIE, startX, startY, stWorld, SOUND_ZOMBIE_DIE, score_value), m_movementPlan(0) {}
+Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) : Person(IID_ZOMBIE, startX, startY, stWorld, SOUND_NONE, SOUND_ZOMBIE_DIE, score_value), m_movementPlan(0) {}
 void Zombie::doAction() {
     // If person in front, vomit on them
     if (m_movementPlan == 0) movementPlan();

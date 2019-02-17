@@ -185,6 +185,7 @@ void StudentWorld::exitPenelope(int x, int y) {
     // Check if there are any remaining live citizens
     for (int i = 0; i < m_actors.size(); i++)
         if (m_actors[i]->alive() && m_actors[i]->infectable()) return;
+    playSound(SOUND_LEVEL_FINISHED);
     m_levelComplete = true;
 }
 

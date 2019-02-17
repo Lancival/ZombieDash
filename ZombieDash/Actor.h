@@ -211,7 +211,7 @@ private:
 class Person : public Actor {
 public:
     // Constructor
-    Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound, int score_value);
+    Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value);
     
     // Properties
     virtual bool blocksMovement() const; // People block movement
@@ -236,7 +236,8 @@ private:
     bool m_infected; // Whether this person has been infected by vomit, always false for zombies
     int m_infection; // Number of ticks person has been infected, always 0 for zombies
     int m_score_value; // Number of points awarded/deducted when this person is destroyed
-    int m_sound; // Sound to be played when this person is destroyed
+    int m_sound_infect; // Sound to be played when this person is destroyed by infection
+    int m_sound_flame; // Sound to be played when this person is destroyed by flames
     bool m_paralyzed; // Whether this person is paralyzed with indecision
 };
 
