@@ -51,12 +51,13 @@ int StudentWorld::init() {
                         break;
                     case Level::dumb_zombie:
                         break;
+                        
                     case Level::player:
                         m_penelope = new Penelope(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, this);
                         break;
                     case Level::citizen:
+                        m_actors.push_back(new Citizen(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, this));
                         break;
-                    
                     case Level::exit:
                         m_actors.push_back(new Exit(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, this));
                         break;
@@ -108,7 +109,10 @@ int StudentWorld::move() {
     // Update the status text
     ostringstream statusTextStream;
     statusTextStream.fill('0');
-    statusTextStream << "Score: " << setw(6) << getScore();
+    if (getScore() < 0)
+        statusTextStream << "Score: -" << setw(5) << abs(getScore());
+    else
+        statusTextStream << "Score: " << setw(6) << getScore();
     statusTextStream << "  Level: " << getLevel();
     statusTextStream << "  Lives: " << getLives();
     statusTextStream << "  Vaccines: " << m_penelope->vaccines();
@@ -138,25 +142,29 @@ void StudentWorld::adjustLandmines(int num) {m_penelope->adjustLandmines(num);}
 void StudentWorld::adjustFlameCharges(int num) {m_penelope->adjustFlameCharges(num);}
 void StudentWorld::adjustVaccines(int num) {m_penelope->adjustVaccines(num);}
 
-bool StudentWorld::boundaryBoxIntersect(int x1, int y1, int x2, int y2) {
+bool StudentWorld::boundaryBoxIntersect(int x1, int y1, int x2, int y2) const {
     if (abs(x1-x2) < SPRITE_WIDTH-1 && abs(y1-y2) < SPRITE_HEIGHT-1)
         return true;
     return false;
 }
 
-bool StudentWorld::isValidDestination(int x, int y, Actor* actor) {
+bool StudentWorld::isValidDestination(int x, int y, Actor* actor) const {
     if (actor != m_penelope)
         if (boundaryBoxIntersect(x, y, m_penelope->getX(), m_penelope->getY()))
             return false;
     for (int i = 0; i < m_actors.size(); i++)
-        if (m_actors[i]->blocksMovement() && m_actors[i]->alive())
+        if (m_actors[i]->blocksMovement() && m_actors[i]->alive() && m_actors[i] != actor)
             if (boundaryBoxIntersect(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
                 return false;
     return true;
 }
 
-bool StudentWorld::overlap(int x1, int y1, int x2, int y2) {
-    return (pow(x1-x2,2) + pow(y1-y2, 2) <= 100) ? true : false;
+double StudentWorld::distance(int x1, int y1, int x2, int y2) const {
+    return pow(pow(x1-x2,2) + pow(y1-y2, 2), 0.5);
+}
+
+bool StudentWorld::overlap(int x1, int y1, int x2, int y2) const {
+    return (distance(x1, y1, x2, y2) <= 10) ? true : false;
 }
 
 void StudentWorld::exitCitizens(int x, int y) {
@@ -180,7 +188,7 @@ void StudentWorld::exitPenelope(int x, int y) {
     m_levelComplete = true;
 }
 
-bool StudentWorld::pickupGoodie(int x, int y) {
+bool StudentWorld::overlapGoodie(int x, int y) const {
     return overlap(x, y, m_penelope->getX(), m_penelope->getY());
 }
 
@@ -201,6 +209,15 @@ void StudentWorld::destroyFlammables(int x, int y) {
         m_penelope->destroy();
 }
 
+void StudentWorld::infectInfectables(int x, int y) {
+    for (int i = 0; i < m_actors.size(); i++)
+        if (m_actors[i]->alive() && m_actors[i]->infectable())
+            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
+                m_actors[i]->infect();
+    if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
+        m_penelope->infect();
+}
+
 void StudentWorld::destroyPitDestructables(int x, int y) {
     for (int i = 0; i < m_actors.size(); i++)
         if (m_actors[i]->alive() && m_actors[i]->pitDestructible())
@@ -219,3 +236,18 @@ bool StudentWorld::overlapPitDestructable(int x, int y) {
                 return true;
     return false;
 }
+
+double StudentWorld::distPenelope(int x, int y) const {return distance(x, y, m_penelope->getX(), m_penelope->getY());}
+double StudentWorld::distZombie(int x, int y) const {
+    int min = INT_MAX;
+    for (int i = 0; i < m_actors.size(); i++) {
+        if (m_actors[i]->alive() && m_actors[i]->pitDestructible() && !m_actors[i]->infectable()) {
+            double dist = distance(x, y, m_actors[i]->getX(), m_actors[i]->getY());
+            if (dist < min) min = dist;
+        }
+    }
+    return min;
+}
+
+int StudentWorld::penelopeX() const {return m_penelope->getX();}
+int StudentWorld::penelopeY() const {return m_penelope->getY();}

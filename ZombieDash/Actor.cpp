@@ -13,6 +13,7 @@ bool Actor::pitDestructible() const {return false;}
 StudentWorld* Actor::world() const {return m_world;}
 void Actor::setDead() {m_alive = false;}
 void Actor::destroy() {m_alive = false;}
+void Actor::infect() {return;}
 
 // Terrain Class Implementations
 Terrain::Terrain(int imageID, int startX, int startY, int depth, StudentWorld* stWorld) : Actor(imageID, startX, startY, GraphObject::right, depth, stWorld) {}
@@ -61,9 +62,7 @@ void Flame::affect() {world()->destroyFlammables(getX(), getY());}
 
 // Vomit Class Implementations
 Vomit::Vomit(int startX, int startY, Direction startDirection, StudentWorld* stWorld) : Projectile(IID_VOMIT, startX, startY, startDirection, stWorld) {}
-void Vomit::affect() {
-    // Infect all infectable actors this vomit overlaps with
-}
+void Vomit::affect() {world()->infectInfectables(getX(), getY());}
 
 // Goodie Class Implementations
 Goodie::Goodie(int imageID, int startX, int startY, StudentWorld* stWorld) : Actor(imageID, startX, startY, GraphObject::right, 1, stWorld) {}
@@ -71,7 +70,7 @@ void Goodie::doSomething() {
     // If the goodie has been destroyed, do nothing
     if (!alive()) return;
     // If the goodie overlaps with Penelope, pick up the goodie
-    if (world()->pickupGoodie(getX(), getY())) {
+    if (world()->overlapGoodie(getX(), getY())) {
         world()->increaseScore(50);
         setDead();
         playGoodieSound();
@@ -133,35 +132,41 @@ void Landmine::destroy() {
     world()->createPit(x, y);
 }
 
-Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0) {}
-bool Person::infectable() const {return true;}
+Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound, int score_value) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound(sound), m_score_value(score_value), m_paralyzed(false) {}
 bool Person::blocksMovement() const {return true;}
 bool Person::pitDestructible() const {return true;}
 int Person::infection() const {return m_infection;}
 bool Person::infected() const {return m_infected;}
+bool Person::paralyzed() {return !(m_paralyzed = !m_paralyzed);}
+void Person::infect() {m_infected = true;}
 void Person::doSomething() {
     if (!alive()) return;
     if (infected() && ++m_infection >= 500) {
         destroy();
         return;
     }
+    if (paralyzed()) return;
     doAction();
 }
-void Person::resetInfection() {
-    m_infected = false;
-    m_infection = 0;
+void Person::destroy() {
+    setDead();
+    world()->playSound(m_sound);
+    world()->increaseScore(m_score_value);
+    // If Person is a citizen create a smart/dumb zombie!!!!!!!!!!!!!!!!!
 }
 
-Penelope::Penelope(int startX, int startY, StudentWorld* stWorld) : Person(IID_PLAYER, startX, startY, stWorld), m_landmines(0), m_flameCharges(0), m_vaccines(0) {}
+Penelope::Penelope(int startX, int startY, StudentWorld* stWorld) : Person(IID_PLAYER, startX, startY, stWorld, SOUND_PLAYER_DIE, 0), m_landmines(0), m_flameCharges(0), m_vaccines(0) {}
+bool Penelope::infectable() const {return true;}
+bool Penelope::paralyzed() {return false;}
 int Penelope::landmines() const {return m_landmines;}
 int Penelope::flameCharges() const {return m_flameCharges;}
 int Penelope::vaccines() const {return m_vaccines;}
 void Penelope::adjustLandmines(int num) {m_landmines += num;}
 void Penelope::adjustFlameCharges(int num) {m_flameCharges += num;}
 void Penelope::adjustVaccines(int num) {m_vaccines += num;}
-void Penelope::destroy() {
-    setDead();
-    world()->playSound(SOUND_PLAYER_DIE);
+void Person::resetInfection() {
+    m_infected = false;
+    m_infection = 0;
 }
 void Penelope::doAction() {
     int key;
@@ -231,4 +236,113 @@ void Penelope::doAction() {
                 }
         }
     }
+}
+
+Citizen::Citizen(int startX, int startY, StudentWorld* stWorld) : Person(IID_CITIZEN, startX, startY, stWorld, SOUND_ZOMBIE_BORN, -1000) {}
+bool Citizen::infectable() const {return true;}
+bool Citizen::moveDirection(Direction dir) {
+    int x = getX();
+    int y = getY();
+    switch (dir) {
+        case GraphObject::up:
+            y += 2;
+            break;
+        case GraphObject::down:
+            y -= 2;
+            break;
+        case GraphObject::left:
+            x -= 2;
+            break;
+        case GraphObject::right:
+            x += 2;
+    }
+    if (world()->isValidDestination(x, y, this)) {
+        setDirection(dir);
+        moveTo(x, y);
+        return true;
+    }
+    return false;
+}
+void Citizen::doAction() {
+    double dist_p = world()->distPenelope(getX(), getY()); // Distance to Penelope
+    double dist_z = world()->distZombie(getX(), getY()); // Distance to the nearest zombie
+    if (dist_p < dist_z && dist_p <= 80) {
+        // If Penelope is closer than the nearest zombie and is closer than 80 pixels away
+        int penelopeX = world()->penelopeX(); // Penelope's x-coordinate
+        int penelopeY = world()->penelopeY(); // Penelope's y-coordinate
+        // If zombie is on the same row or column as Penelope, try moving towards Penelope
+        if (getX() == penelopeX) {
+            if (getY() > penelopeY) {
+                if (moveDirection(GraphObject::down)) return;
+            }
+            else if (moveDirection(GraphObject::up)) return;
+        }
+        else if (getY() == penelopeY) {
+            if (getX() > penelopeX) {
+                if (moveDirection(GraphObject::left)) return;
+            }
+            else if (moveDirection(GraphObject::right)) return;
+        }
+        else {
+            // Otherwise, randomly try one of the two directions to move closer to Penelope, then try the other
+            if (randInt(0, 1) == 0) {
+                if (getX() > penelopeX) {
+                    if (moveDirection(GraphObject::left)) return;
+                }
+                else if (moveDirection(GraphObject::right)) return;
+                if (getY() > penelopeY) {
+                    if (moveDirection(GraphObject::down)) return;
+                }
+                else if (moveDirection(GraphObject::up)) return;
+            }
+            else {
+                if (getY() > penelopeY) {
+                    if (moveDirection(GraphObject::down)) return;
+                }
+                else if (moveDirection(GraphObject::up)) return;
+                if (getX() > penelopeX) {
+                    if (moveDirection(GraphObject::left)) return;
+                }
+                else if (moveDirection(GraphObject::right)) return;
+            }
+        }
+    }
+    // Otherwise, try to move away from nearby zombies
+    if (dist_z <= 80) {
+        // Find the distances to the nearest zombie if this citizen moved for each direction
+        double dist_up = world()->isValidDestination(getX(), getY()+2, this) ? world()->distZombie(getX(), getY()+2) : -1;
+        double dist_down = world()->isValidDestination(getX(), getY()-2, this) ? world()->distZombie(getX(), getY()-2): -1;
+        double dist_left = world()->isValidDestination(getX()-2, getY(), this) ? world()->distZombie(getX()-2, getY()) : -1;
+        double dist_right = world()->isValidDestination(getX()+2, getY(), this) ? world()->distZombie(getX()+2, getY()) : -1;
+        // Move (or stay still) to maximize the distance to the nearest zombie
+        if (dist_up != -1 && dist_up > dist_down && dist_up > dist_left && dist_up > dist_right && dist_up > dist_z) {
+            setDirection(GraphObject::up);
+            moveTo(getX(), getY() + 2);
+            return;
+        }
+        if (dist_down != -1 && dist_down > dist_left && dist_down > dist_right && dist_down > dist_z) {
+            setDirection(GraphObject::down);
+            moveTo(getX(), getY() - 2);
+            return;
+        }
+        if (dist_left != -1 && dist_left > dist_right && dist_left > dist_z) {
+            setDirection(GraphObject::left);
+            moveTo(getX() - 2, getY());
+            return;
+        }
+        if (dist_right != -1 && dist_right > dist_z) {
+            setDirection(GraphObject::right);
+            moveTo(getX() + 2, getY());
+            return;
+        }
+    }
+    // If all else fails, do nothing
+}
+
+Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) : Person(IID_ZOMBIE, startX, startY, stWorld, SOUND_ZOMBIE_DIE, score_value), m_movementPlan(0) {}
+void Zombie::doAction() {
+    // If person in front, vomit on them
+    if (m_movementPlan == 0) movementPlan();
+    // Move 1 pixel forward
+    // If blocked, set m_movementPlan to 0
 }

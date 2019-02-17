@@ -29,22 +29,28 @@ public:
     void adjustLandmines(int num); // Adjusts the number of landmines Penelope is carrying by num
     void adjustFlameCharges(int num); // Adjusts the number of flamethrower charges Penelope is carrying by num
     void adjustVaccines(int num); // Adjusts the number of vaccines Penelope is carrying by num
-    bool isValidDestination(int x, int y, Actor* actor); // Returns whether moving to the specified location is allowed
+    bool isValidDestination(int x, int y, Actor* actor) const; // Returns whether moving to the specified location is allowed
     void exitCitizens(int x, int y); // Detects which overlap with an exit and removes them
     void exitPenelope(int x, int y); // Detects and handles whether Penelope has completed the level
-    bool pickupGoodie(int x, int y); // Returns whether Penelope overlaps with the goodie at (x, y)
+    bool overlapGoodie(int x, int y) const; // Returns whether Penelope overlaps with the goodie at (x, y)
     bool projectileBlocked(int x, int y); // Returns whether a projectile would be blocked by a wall or exit at (x, y)
     void destroyFlammables(int x, int y); // Destroys all flammables at (x, y)
+    void infectInfectables(int x, int y); // Infects all infectables at (x, y)
     void destroyPitDestructables(int x, int y); // Destroys all pit-destructible actors at (x, y)
     bool overlapPitDestructable(int x, int y); // Returns whether a pit-destructible actor overlaps with (x, y)
+    double distPenelope(int x, int y) const; // Returns the distance to Penelope from (x, y)
+    double distZombie(int x, int y) const; // Returns the distance to the nearest zombie from (x, y)
+    int penelopeX() const; // Returns the x-coordinate of Penelope
+    int penelopeY() const; // Returns the y-coordinate of Penelope
 private:
     std::vector<Actor*> m_actors; // Array of pointers to all actors in the game, other than Penelope
     Penelope* m_penelope; // Pointer to Penelope
     bool m_levelComplete; // Whether the level has been completed
     
     // Helper Functions
-    bool boundaryBoxIntersect(int x1, int y1, int x2, int y2); // Determines whether bounding boxes with their lower-left corner at (x1, y1) and (x2, y2) intersect
-    bool overlap(int x1, int y1, int x2, int y2); // Determines whether actors at (x1, y1) and (x2, y2) overlap
+    double distance(int x1, int y1, int x2, int y2) const; // Returns the distance between (x1, y1) and (x2, y2)
+    bool boundaryBoxIntersect(int x1, int y1, int x2, int y2) const; // Determines whether bounding boxes with their lower-left corner at (x1, y1) and (x2, y2) intersect
+    bool overlap(int x1, int y1, int x2, int y2) const; // Determines whether actors at (x1, y1) and (x2, y2) overlap
 };
 
 #endif // STUDENTWORLD_H_

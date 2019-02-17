@@ -29,6 +29,7 @@ public:
     void setDead(); // Directly sets state of actor to dead
     virtual void destroy(); // Destroys actor as if by destroyed by fire
     virtual void doSomething() = 0;
+    virtual void infect();
 protected:
     // Accessors
     StudentWorld* world() const; // Returns a pointer to the Studentworld that "contains" this actor
@@ -203,18 +204,16 @@ private:
 };
 
 /* Person Class Declaration
- * - Base class for Penelope and citizens
- * - All people are infectable and have an infection counter
+ * - Base class for Penelope, citizens, and zombies
  * - All people block the movement of other people/zombies
  * - All people can fall into pits and be destroyed
  */
 class Person : public Actor {
 public:
     // Constructor
-    Person(int imageID, int startX, int startY, StudentWorld* stWorld);
+    Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound, int score_value);
     
     // Properties
-    virtual bool infectable() const; // People are infectable
     virtual bool blocksMovement() const; // People block movement
     virtual bool pitDestructible() const; // People can be destroyed by pits
     
@@ -223,6 +222,8 @@ public:
     
     // Actions
     virtual void doSomething(); // Checks if turned into zombie, then call doAction()
+    virtual void destroy(); // People play a sound and change Penelope's score when destroyed
+    virtual void infect(); // Infects this person
     void resetInfection(); // Uninfects this person
 protected:
     // Accessors
@@ -230,17 +231,28 @@ protected:
     
     // Actions
     virtual void doAction() = 0; // Makes this person do some action
+    virtual bool paralyzed(); // Returns whether this person is paralyzed with indecision
 private:
-    bool m_infected; // Whether this person has been infected by vomit
-    int m_infection; // Number of ticks person has been infected
+    bool m_infected; // Whether this person has been infected by vomit, always false for zombies
+    int m_infection; // Number of ticks person has been infected, always 0 for zombies
+    int m_score_value; // Number of points awarded/deducted when this person is destroyed
+    int m_sound; // Sound to be played when this person is destroyed
+    bool m_paralyzed; // Whether this person is paralyzed with indecision
 };
 
 /* Penelope Class Declaration
- * - Arguably the most complicated Actor class in the game!
+ * - Arguably the most complex Actor class in the game!
+ * - Penelope is infectable, but is never paralyzed
+ * - Penelope can carry landmines, vaccines, and flamethrower charges
+ * - Penelope's movement is controlled by the player in doAction()
  */
 class Penelope : public Person {
 public:
+    // Constructor
     Penelope(int startX, int startY, StudentWorld* stWorld);
+    
+    // Properties
+    virtual bool infectable() const; // Penelope is infectable
     
     // Accessors
     int landmines() const; // Returns the number of landmines carried by Penelope
@@ -251,14 +263,41 @@ public:
     void adjustLandmines(int num); // Changes the number of landmines carried by Penelope by num
     void adjustFlameCharges(int num); // Changes the number of flamethrower charges carried by Penelope by num
     void adjustVaccines(int num); // Changes the number of vaccines carried by Penelope
-    virtual void destroy(); // Handles when Penelope is killed by fire or zombie
 protected:
     // Actions
     virtual void doAction(); // Detects user input and has Penelope act accordingly
+    virtual bool paralyzed(); // Penelope is never paralyzed with indecision!
 private:
     int m_landmines; // Number of landmines carried by Penelope
     int m_flameCharges; // Number of flamethrower charges carried by Penelope
     int m_vaccines; // Number of vaccines carried by Penelope
+};
+
+class Citizen : public Person {
+public:
+    // Constructor
+    Citizen(int startX, int startY, StudentWorld* stWorld);
+    
+    // Properties
+    virtual bool infectable() const; // Citizens are infectable
+protected:
+    // Actions
+    virtual void doAction(); // Citizens follow Penelope and run from zombies
+private:
+    // Actions
+    bool moveDirection(Direction dir); // Attempts to move in Direction dir, returns whether move was successful
+};
+
+class Zombie : public Person {
+public:
+    // Constructor
+    Zombie(int startX, int startY, StudentWorld* stWorld, int score_value);
+protected:
+    // Actions
+    virtual void doAction(); // Zombies have common movement behaviors
+    virtual void movementPlan() = 0; // Zombies create movement plans
+private:
+    int m_movementPlan; // Distance to travel in current direction
 };
 
 #endif // ACTOR_H_
