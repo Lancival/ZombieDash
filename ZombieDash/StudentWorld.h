@@ -24,8 +24,10 @@ public:
     
     // Helper Functions
     void createFlame(int startX, int startY, Direction dir = GraphObject::right); // Creates a flame at the specified location
+    void createVomit (int startX, int startY, Direction dir); // Creates a vomit at the specified location
     void createPit(int startX, int startY); // Creates a pit at the specified location
     void createLandmine(int startX, int startY); // Creates a landmine at the specified location
+    void createZombie(int startX, int startY); // Creates a zombie at the specified location
     void adjustLandmines(int num); // Adjusts the number of landmines Penelope is carrying by num
     void adjustFlameCharges(int num); // Adjusts the number of flamethrower charges Penelope is carrying by num
     void adjustVaccines(int num); // Adjusts the number of vaccines Penelope is carrying by num
@@ -42,6 +44,7 @@ public:
     double distZombie(int x, int y) const; // Returns the distance to the nearest zombie from (x, y)
     int penelopeX() const; // Returns the x-coordinate of Penelope
     int penelopeY() const; // Returns the y-coordinate of Penelope
+    bool overlapInfectable(int x, int y); // Returns whether there is an infectable that overlaps (x, y)
 private:
     std::vector<Actor*> m_actors; // Array of pointers to all actors in the game, other than Penelope
     Penelope* m_penelope; // Pointer to Penelope

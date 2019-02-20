@@ -296,7 +296,7 @@ protected:
 };
 
 /* Zombie Class Declaration
- * - Base class for dumb zombies and smart zombies
+ * - Class for dumb zombies, but is also the base class of a smart zombie
  * - All zombies are not infectable
  * - All zombies have movement plans
  */
@@ -304,12 +304,20 @@ class Zombie : public Person {
 public:
     // Constructor
     Zombie(int startX, int startY, StudentWorld* stWorld, int score_value);
+    
 protected:
     // Actions
     virtual void doAction(); // Zombies have common movement behaviors
-    virtual void movementPlan() = 0; // Zombies create movement plans
 private:
     int m_movementPlan; // Distance to travel in current direction
+    
+    // Actions
+    virtual void movementPlan(); // Zombies create movement plans
+    bool vomit(); // Zombies will vomit on nearby people
 };
+
+/*class SmartZombie : public Zombie {
+    
+};*/
 
 #endif // ACTOR_H_

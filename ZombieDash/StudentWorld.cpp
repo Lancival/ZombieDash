@@ -49,9 +49,10 @@ int StudentWorld::init() {
                     // Finish writing these
                     case Level::smart_zombie:
                         break;
-                    case Level::dumb_zombie:
-                        break;
                         
+                    case Level::dumb_zombie:
+                        m_actors.push_back(new Zombie(x*SPRITE_HEIGHT, y*SPRITE_WIDTH, this, 1000));
+                        break;
                     case Level::player:
                         m_penelope = new Penelope(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, this);
                         break;
@@ -252,3 +253,22 @@ double StudentWorld::distZombie(int x, int y) const {
 
 int StudentWorld::penelopeX() const {return m_penelope->getX();}
 int StudentWorld::penelopeY() const {return m_penelope->getY();}
+
+void StudentWorld::createVomit(int startX, int startY, Direction dir) {m_actors.push_back(new Vomit(startX, startY, dir, this));}
+bool StudentWorld::overlapInfectable(int x, int y) {
+    if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
+        return true;
+    for (int i = 0; i < m_actors.size(); i++)
+        if (m_actors[i]->alive() && m_actors[i]->infectable())
+            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
+                return true;
+    return false;
+}
+
+void StudentWorld::createZombie(int startX, int startY) {
+    if (randInt(1, 10) <= 3)
+        m_actors.push_back(new Zombie(startX, startY, this, 1000));
+    else
+        m_actors.push_back(new Zombie(startX, startY, this, 2000));
+    // Change when smart zombies implemented
+}

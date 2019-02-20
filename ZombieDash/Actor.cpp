@@ -152,7 +152,7 @@ void Person::destroy() {
     setDead();
     world()->playSound(m_infection >= 500 ? m_sound_infect : m_sound_flame);
     world()->increaseScore(m_score_value);
-    // If Person is a citizen create a smart/dumb zombie!!!!!!!!!!!!!!!!!
+    if (m_infection >= 500 && world()->distPenelope(getX(), getY()) != 0) world()->createZombie(getX(), getY());
 }
 bool Person::moveDirection(Direction dir) {
     int x = getX();
@@ -341,8 +341,49 @@ void Citizen::doAction() {
 
 Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) : Person(IID_ZOMBIE, startX, startY, stWorld, SOUND_NONE, SOUND_ZOMBIE_DIE, score_value, 1), m_movementPlan(0) {}
 void Zombie::doAction() {
-    // If person in front, vomit on them
+    // Vomit on nearby infectables
+    if (vomit()) return;
     if (m_movementPlan == 0) movementPlan();
-    // Move 1 pixel forward
-    // If blocked, set m_movementPlan to 0
+    // Move 1 pixel forward, and decrement movement plan distance. If blocked, set movement plan to 0 instead.
+    m_movementPlan = moveDirection(getDirection()) ? m_movementPlan - 1 : 0;
+}
+bool Zombie::vomit() {
+    int vomitX = getX();
+    int vomitY = getY();
+    switch (getDirection()) {
+        case GraphObject::right:
+            vomitX += SPRITE_WIDTH;
+            break;
+        case GraphObject::left:
+            vomitX -= SPRITE_WIDTH;
+            break;
+        case GraphObject::up:
+            vomitY += SPRITE_HEIGHT;
+            break;
+        case GraphObject::down:
+            vomitY -= SPRITE_HEIGHT;
+    }
+    if (world()->overlapInfectable(vomitX, vomitY) && randInt(1,3) == 1) {
+        world()->createVomit(vomitX, vomitY, getDirection());
+        world()->playSound(SOUND_ZOMBIE_VOMIT);
+        return true;
+    }
+    return false;
+}
+void Zombie::movementPlan() {
+    m_movementPlan = randInt(3, 10);
+    switch (randInt(1,4)) {
+        case 1:
+            setDirection(GraphObject::right);
+            break;
+        case 2:
+            setDirection(GraphObject::left);
+            break;
+        case 3:
+            setDirection(GraphObject::up);
+            break;
+        case 4:
+            setDirection(GraphObject::down);
+            break;
+    }
 }
