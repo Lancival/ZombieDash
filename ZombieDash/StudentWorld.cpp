@@ -267,8 +267,7 @@ void StudentWorld::createZombie(int startX, int startY) {
     if (randInt(1, 10) <= 3)
         m_actors.push_back(new Zombie(startX, startY, this));
     else
-        m_actors.push_back(new Zombie(startX, startY, this, 2000));
-    // Change when smart zombies implemented
+        m_actors.push_back(new SmartZombie(startX, startY, this));
 }
 
 Direction StudentWorld::smartDirection(int x, int y) {
@@ -277,8 +276,10 @@ Direction StudentWorld::smartDirection(int x, int y) {
     for (int i = 0; i < m_actors.size(); i++) {
         if (m_actors[i]->alive() && m_actors[i]->infectable()) {
             double dist = distance(x, y, m_actors[i]->getX(), m_actors[i]->getY());
-            if (dist < min) min = dist;
-            target = m_actors[i];
+            if (dist < min) {
+                min = dist;
+                target = m_actors[i];
+            }
         }
     }
     if (min > 80) return randDirection();
@@ -307,3 +308,5 @@ Direction StudentWorld::randDirection() {
     }
     return GraphObject::right; // Will never be reached
 }
+
+void StudentWorld::createVaccine(int startX, int startY) {m_actors.push_back(new VaccineGoodie(startX, startY, this));}

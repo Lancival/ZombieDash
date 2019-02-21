@@ -153,6 +153,8 @@ void Person::destroy() {
     world()->playSound(m_infection >= 500 ? m_sound_infect : m_sound_flame);
     world()->increaseScore(m_score_value);
     if (m_infection >= 500 && world()->distPenelope(getX(), getY()) != 0) world()->createZombie(getX(), getY());
+    if (!infectable() && m_score_value == 1000 && randInt(1, 10) == 1)
+        world()->createVaccine(getX(), getY());
 }
 bool Person::moveDirection(Direction dir) {
     int x = getX();

@@ -28,6 +28,7 @@ public:
     void createPit(int startX, int startY); // Creates a pit at the specified location
     void createLandmine(int startX, int startY); // Creates a landmine at the specified location
     void createZombie(int startX, int startY); // Creates a zombie at the specified location
+    void createVaccine(int startX, int startY); // Creates a vaccine at the specified location
     void adjustLandmines(int num); // Adjusts the number of landmines Penelope is carrying by num
     void adjustFlameCharges(int num); // Adjusts the number of flamethrower charges Penelope is carrying by num
     void adjustVaccines(int num); // Adjusts the number of vaccines Penelope is carrying by num
