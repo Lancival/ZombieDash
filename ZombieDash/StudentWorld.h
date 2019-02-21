@@ -45,6 +45,8 @@ public:
     int penelopeX() const; // Returns the x-coordinate of Penelope
     int penelopeY() const; // Returns the y-coordinate of Penelope
     bool overlapInfectable(int x, int y); // Returns whether there is an infectable that overlaps (x, y)
+    Direction smartDirection(int x, int y); // Returns the direction a smart zombie should head from (x, y)
+    Direction randDirection(); // Returns a random direction
 private:
     std::vector<Actor*> m_actors; // Array of pointers to all actors in the game, other than Penelope
     Penelope* m_penelope; // Pointer to Penelope

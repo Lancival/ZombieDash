@@ -343,7 +343,10 @@ Zombie::Zombie(int startX, int startY, StudentWorld* stWorld, int score_value) :
 void Zombie::doAction() {
     // Vomit on nearby infectables
     if (vomit()) return;
-    if (m_movementPlan == 0) movementPlan();
+    if (m_movementPlan == 0) {
+        m_movementPlan = randInt(3, 10);
+        movementPlan();
+    }
     // Move 1 pixel forward, and decrement movement plan distance. If blocked, set movement plan to 0 instead.
     m_movementPlan = moveDirection(getDirection()) ? m_movementPlan - 1 : 0;
 }
@@ -370,20 +373,7 @@ bool Zombie::vomit() {
     }
     return false;
 }
-void Zombie::movementPlan() {
-    m_movementPlan = randInt(3, 10);
-    switch (randInt(1,4)) {
-        case 1:
-            setDirection(GraphObject::right);
-            break;
-        case 2:
-            setDirection(GraphObject::left);
-            break;
-        case 3:
-            setDirection(GraphObject::up);
-            break;
-        case 4:
-            setDirection(GraphObject::down);
-            break;
-    }
-}
+void Zombie::movementPlan() {setDirection(world()->randDirection());}
+
+SmartZombie::SmartZombie(int startX, int startY, StudentWorld* stWorld) : Zombie(startX, startY, stWorld, 2000) {}
+void SmartZombie::movementPlan() {setDirection(world()->smartDirection(getX(), getY()));}

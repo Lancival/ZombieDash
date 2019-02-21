@@ -303,21 +303,32 @@ protected:
 class Zombie : public Person {
 public:
     // Constructor
-    Zombie(int startX, int startY, StudentWorld* stWorld, int score_value);
+    Zombie(int startX, int startY, StudentWorld* stWorld, int score_value = 1000);
     
 protected:
     // Actions
     virtual void doAction(); // Zombies have common movement behaviors
+    virtual void movementPlan(); // Zombies create movement plans
 private:
     int m_movementPlan; // Distance to travel in current direction
     
     // Actions
-    virtual void movementPlan(); // Zombies create movement plans
     bool vomit(); // Zombies will vomit on nearby people
 };
 
-/*class SmartZombie : public Zombie {
-    
-};*/
+/* Smart Zombie Class Declaration
+ * - Class for smart zombies
+ * - Smart zombies have a different way of determining a new movement plan
+ * - Smart zombies are worth a greater number of points
+ * - Smart zombies are otherwise identical to dumb zombies
+ */
+class SmartZombie : public Zombie {
+public:
+    // Constructor
+    SmartZombie(int startX, int startY, StudentWorld* stWorld);
+protected:
+    // Actions
+    virtual void movementPlan(); // Smart zombies have a different way of creating movement plans
+};
 
 #endif // ACTOR_H_

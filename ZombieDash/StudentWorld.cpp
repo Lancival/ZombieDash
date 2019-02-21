@@ -45,13 +45,11 @@ int StudentWorld::init() {
                 switch (ge) {
                     case Level::empty:
                         break;
-                        
-                    // Finish writing these
                     case Level::smart_zombie:
+                        m_actors.push_back(new SmartZombie(x*SPRITE_HEIGHT, y*SPRITE_WIDTH, this));
                         break;
-                        
                     case Level::dumb_zombie:
-                        m_actors.push_back(new Zombie(x*SPRITE_HEIGHT, y*SPRITE_WIDTH, this, 1000));
+                        m_actors.push_back(new Zombie(x*SPRITE_HEIGHT, y*SPRITE_WIDTH, this));
                         break;
                     case Level::player:
                         m_penelope = new Penelope(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, this);
@@ -267,8 +265,45 @@ bool StudentWorld::overlapInfectable(int x, int y) {
 
 void StudentWorld::createZombie(int startX, int startY) {
     if (randInt(1, 10) <= 3)
-        m_actors.push_back(new Zombie(startX, startY, this, 1000));
+        m_actors.push_back(new Zombie(startX, startY, this));
     else
         m_actors.push_back(new Zombie(startX, startY, this, 2000));
     // Change when smart zombies implemented
+}
+
+Direction StudentWorld::smartDirection(int x, int y) {
+    Actor* target = m_penelope;
+    int min = distPenelope(x, y);
+    for (int i = 0; i < m_actors.size(); i++) {
+        if (m_actors[i]->alive() && m_actors[i]->infectable()) {
+            double dist = distance(x, y, m_actors[i]->getX(), m_actors[i]->getY());
+            if (dist < min) min = dist;
+            target = m_actors[i];
+        }
+    }
+    if (min > 80) return randDirection();
+    else {
+        // If target is on the same row or column as zombie
+        if (x == target->getX())
+            return(y > target->getY() ? GraphObject::down : GraphObject::up);
+        else if (y == target->getY())
+            return(x > target->getX() ? GraphObject::left : GraphObject::right);
+        else {
+            // Otherwise, randomly try one of the two directions to move closer to target
+            if (randInt(0, 1) == 0)
+                return x > target->getX() ? GraphObject::left : GraphObject::right;
+            else
+                return y > target->getY() ? GraphObject::down : GraphObject::up;
+        }
+    }
+}
+
+Direction StudentWorld::randDirection() {
+    switch (randInt(1,4)) {
+        case 1: return(GraphObject::right);
+        case 2: return(GraphObject::left);
+        case 3: return(GraphObject::up);
+        case 4: return(GraphObject::down);
+    }
+    return GraphObject::right; // Will never be reached
 }
