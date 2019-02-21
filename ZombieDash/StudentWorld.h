@@ -18,28 +18,27 @@ public:
     ~StudentWorld(); // Calls cleanUp() to delete all actors
     
     // Level Functions
-    virtual int init(); // Loads information from the level data file
-    virtual int move(); // Makes each actor do something, and then deletes dead actors
-    virtual void cleanUp(); // Deletes all actors
+    virtual int     init();     // Loads information from the level data file
+    virtual int     move();     // Makes each actor do something, and then deletes dead actors
+    virtual void    cleanUp();  // Deletes all actors
     
-    // Helper Functions
-    void createFlame(int startX, int startY, Direction dir = GraphObject::right); // Creates a flame at the specified location
-    void createVomit (int startX, int startY, Direction dir); // Creates a vomit at the specified location
-    void createPit(int startX, int startY); // Creates a pit at the specified location
-    void createLandmine(int startX, int startY); // Creates a landmine at the specified location
-    void createZombie(int startX, int startY); // Creates a zombie at the specified location
-    void createVaccine(int startX, int startY); // Creates a vaccine at the specified location
+    // Actor Creation Helper Functions
+    void addActor(Actor* newActor); // Adds an actor to m_actors
+    
+    // Goodie Adjustment Helper Functions
     void adjustLandmines(int num); // Adjusts the number of landmines Penelope is carrying by num
     void adjustFlameCharges(int num); // Adjusts the number of flamethrower charges Penelope is carrying by num
     void adjustVaccines(int num); // Adjusts the number of vaccines Penelope is carrying by num
+    
+    // Destroy Actor Functions
+    void destroyOfType(int x, int y, bool (Actor::*property)() const); // Destroys all actors overlapping (x, y) satisfying given property
+    
     bool isValidDestination(int x, int y, Actor* actor) const; // Returns whether moving to the specified location is allowed
     void exitCitizens(int x, int y); // Detects which overlap with an exit and removes them
     void exitPenelope(int x, int y); // Detects and handles whether Penelope has completed the level
     bool overlapGoodie(int x, int y) const; // Returns whether Penelope overlaps with the goodie at (x, y)
     bool projectileBlocked(int x, int y); // Returns whether a projectile would be blocked by a wall or exit at (x, y)
-    void destroyFlammables(int x, int y); // Destroys all flammables at (x, y)
     void infectInfectables(int x, int y); // Infects all infectables at (x, y)
-    void destroyPitDestructables(int x, int y); // Destroys all pit-destructible actors at (x, y)
     bool overlapPitDestructable(int x, int y); // Returns whether a pit-destructible actor overlaps with (x, y)
     double distPenelope(int x, int y) const; // Returns the distance to Penelope from (x, y)
     double distZombie(int x, int y) const; // Returns the distance to the nearest zombie from (x, y)

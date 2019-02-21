@@ -10,11 +10,11 @@ using namespace std;
 
 GameWorld* createStudentWorld(string assetPath) {return new StudentWorld(assetPath);}
 
+// Constructor
 StudentWorld::StudentWorld(string assetPath) : GameWorld(assetPath), m_actors(), m_penelope(NULL), m_levelComplete(false) {}
 
-StudentWorld::~StudentWorld() {
-    cleanUp();
-}
+// Main Functions
+StudentWorld::~StudentWorld() {cleanUp();}
 
 int StudentWorld::init() {
     Level level(assetPath());
@@ -29,8 +29,10 @@ int StudentWorld::init() {
     // Load the file
     Level::LoadResult result = level.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found) {
-        cerr << "Error: Could not find " << levelFile << " data file." << endl;
-        return GWSTATUS_LEVEL_ERROR; // Should this return something else when file cannot be found?
+        if (getLevel() == 1)
+            cerr << "Error: Could not find " << levelFile << " data file." << endl;
+        else
+            return GWSTATUS_PLAYER_WON;
     }
     else if (result == Level::load_fail_bad_format) {
         cerr << "Error: " << levelFile << " data file improperly formatted." << endl;
@@ -114,7 +116,7 @@ int StudentWorld::move() {
         statusTextStream << "Score: " << setw(6) << getScore();
     statusTextStream << "  Level: " << getLevel();
     statusTextStream << "  Lives: " << getLives();
-    statusTextStream << "  Vaccines: " << m_penelope->vaccines();
+    statusTextStream << "  Vacc: " << m_penelope->vaccines(); // Ask Professor Smallberg
     statusTextStream << "  Flames: " << m_penelope->flameCharges();
     statusTextStream << "  Mines: " << m_penelope->landmines();
     statusTextStream << "  Infected: " << m_penelope->infection();
@@ -133,10 +135,10 @@ void StudentWorld::cleanUp() {
     m_levelComplete = false;
 }
 
-void StudentWorld::createFlame(int startX, int startY, Direction dir) {m_actors.push_back(new Flame(startX, startY, dir, this));}
-void StudentWorld::createPit(int startX, int startY) {m_actors.push_back(new Pit(startX, startY, this));}
-void StudentWorld::createLandmine(int startX, int startY) {m_actors.push_back(new Landmine(startX, startY, this));}
+// Actor Creation Helper Functions
+void StudentWorld::addActor(Actor* newActor) {m_actors.push_back(newActor);}
 
+// Goodie Adjustment Helper Functions
 void StudentWorld::adjustLandmines(int num) {m_penelope->adjustLandmines(num);}
 void StudentWorld::adjustFlameCharges(int num) {m_penelope->adjustFlameCharges(num);}
 void StudentWorld::adjustVaccines(int num) {m_penelope->adjustVaccines(num);}
@@ -167,6 +169,7 @@ bool StudentWorld::overlap(int x1, int y1, int x2, int y2) const {
 }
 
 void StudentWorld::exitCitizens(int x, int y) {
+    // For each citizen, check if the citizen overlaps the exit
     for (int i = 0; i < m_actors.size(); i++) {
         if (m_actors[i]->alive() && m_actors[i]->infectable()) {
             if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY())) {
@@ -200,13 +203,14 @@ bool StudentWorld::projectileBlocked(int x, int y) {
     return false;
 }
 
-void StudentWorld::destroyFlammables(int x, int y) {
+// Destroy Actor Functions
+void StudentWorld::destroyOfType(int x, int y, bool (Actor::*property)() const) {
+    if (m_penelope->alive() && (m_penelope->*property)() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
+        m_penelope->destroy();
     for (int i = 0; i < m_actors.size(); i++)
-        if (m_actors[i]->alive() && m_actors[i]->flammable())
+        if (m_actors[i]->alive() && (m_actors[i]->*property)())
             if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
                 m_actors[i]->destroy();
-    if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
-        m_penelope->destroy();
 }
 
 void StudentWorld::infectInfectables(int x, int y) {
@@ -216,15 +220,6 @@ void StudentWorld::infectInfectables(int x, int y) {
                 m_actors[i]->infect();
     if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
         m_penelope->infect();
-}
-
-void StudentWorld::destroyPitDestructables(int x, int y) {
-    for (int i = 0; i < m_actors.size(); i++)
-        if (m_actors[i]->alive() && m_actors[i]->pitDestructible())
-            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
-                m_actors[i]->destroy();
-    if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
-        m_penelope->destroy();
 }
 
 bool StudentWorld::overlapPitDestructable(int x, int y) {
@@ -252,7 +247,6 @@ double StudentWorld::distZombie(int x, int y) const {
 int StudentWorld::penelopeX() const {return m_penelope->getX();}
 int StudentWorld::penelopeY() const {return m_penelope->getY();}
 
-void StudentWorld::createVomit(int startX, int startY, Direction dir) {m_actors.push_back(new Vomit(startX, startY, dir, this));}
 bool StudentWorld::overlapInfectable(int x, int y) {
     if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
         return true;
@@ -261,13 +255,6 @@ bool StudentWorld::overlapInfectable(int x, int y) {
             if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
                 return true;
     return false;
-}
-
-void StudentWorld::createZombie(int startX, int startY) {
-    if (randInt(1, 10) <= 3)
-        m_actors.push_back(new Zombie(startX, startY, this));
-    else
-        m_actors.push_back(new SmartZombie(startX, startY, this));
 }
 
 Direction StudentWorld::smartDirection(int x, int y) {
@@ -308,5 +295,3 @@ Direction StudentWorld::randDirection() {
     }
     return GraphObject::right; // Will never be reached
 }
-
-void StudentWorld::createVaccine(int startX, int startY) {m_actors.push_back(new VaccineGoodie(startX, startY, this));}

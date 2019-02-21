@@ -36,7 +36,7 @@ void Exit::doSomething() {
 
 // Pit Class Implementations
 Pit::Pit(int startX, int startY, StudentWorld* stWorld) : Terrain(IID_PIT, startX, startY, 0, stWorld) {}
-void Pit::doSomething() {world()->destroyPitDestructables(getX(), getY());}
+void Pit::doSomething() {world()->destroyOfType(getX(), getY(), &Actor::pitDestructible);}
 
 // Projectile Class Implementations
 Projectile::Projectile(int imageID, int startX, int startY, Direction startDirection, StudentWorld* stWorld) : Actor(imageID, startX, startY, startDirection, 0, stWorld), m_ticksLeft(2) {}
@@ -58,7 +58,7 @@ void Projectile::decTicks() {m_ticksLeft--;}
 
 // Flame Class Implementations
 Flame::Flame(int startX, int startY, Direction startDirection, StudentWorld* stWorld) : Projectile(IID_FLAME, startX, startY, startDirection, stWorld) {}
-void Flame::affect() {world()->destroyFlammables(getX(), getY());}
+void Flame::affect() {world()->destroyOfType(getX(), getY(), &Actor::flammable);}
 
 // Vomit Class Implementations
 Vomit::Vomit(int startX, int startY, Direction startDirection, StudentWorld* stWorld) : Projectile(IID_VOMIT, startX, startY, startDirection, stWorld) {}
@@ -111,25 +111,25 @@ void Landmine::destroy() {
     // Create flames at and around the landmine
     int x = getX();
     int y = getY();
-    world()->createFlame(x, y);
+    world()->addActor(new Flame(x, y, GraphObject::right, world()));
     if (!world()->projectileBlocked(x+SPRITE_WIDTH, y))
-        world()->createFlame(x+SPRITE_WIDTH, y);
+        world()->addActor(new Flame(x+SPRITE_WIDTH, y, GraphObject::right, world()));
     if (!world()->projectileBlocked(x+SPRITE_WIDTH, y+SPRITE_HEIGHT))
-        world()->createFlame(x+SPRITE_WIDTH, y+SPRITE_HEIGHT);
+        world()->addActor(new Flame(x+SPRITE_WIDTH, y+SPRITE_HEIGHT, GraphObject::right, world()));
     if (!world()->projectileBlocked(x, y+SPRITE_HEIGHT))
-        world()->createFlame(x, y+SPRITE_HEIGHT);
+        world()->addActor(new Flame(x, y+SPRITE_HEIGHT, GraphObject::right, world()));
     if (!world()->projectileBlocked(x-SPRITE_WIDTH, y+SPRITE_HEIGHT))
-        world()->createFlame(x-SPRITE_WIDTH, y+SPRITE_HEIGHT);
+        world()->addActor(new Flame(x-SPRITE_WIDTH, y+SPRITE_HEIGHT, GraphObject::right, world()));
     if (!world()->projectileBlocked(x-SPRITE_WIDTH, y))
-        world()->createFlame(x-SPRITE_WIDTH, y);
+        world()->addActor(new Flame(x-SPRITE_WIDTH, y, GraphObject::right, world()));
     if (!world()->projectileBlocked(x-SPRITE_WIDTH, y-SPRITE_HEIGHT))
-        world()->createFlame(x-SPRITE_WIDTH, y-SPRITE_HEIGHT);
+        world()->addActor(new Flame(x-SPRITE_WIDTH, y-SPRITE_HEIGHT, GraphObject::right, world()));
     if (!world()->projectileBlocked(x, y-SPRITE_HEIGHT))
-        world()->createFlame(x, y-SPRITE_HEIGHT);
+        world()->addActor(new Flame(x, y-SPRITE_HEIGHT, GraphObject::right, world()));
     if (!world()->projectileBlocked(x+SPRITE_WIDTH, y-SPRITE_HEIGHT))
-        world()->createFlame(x+SPRITE_WIDTH, y-SPRITE_HEIGHT);
+        world()->addActor(new Flame(x+SPRITE_WIDTH, y-SPRITE_HEIGHT, GraphObject::right, world()));
     // Create pit object at landmine
-    world()->createPit(x, y);
+    world()->addActor(new Pit(x, y, world()));
 }
 
 Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value, int step_distance) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound_infect(sound_infect), m_sound_flame(sound_flame), m_score_value(score_value), m_paralyzed(false), m_step_distance(step_distance) {}
@@ -152,9 +152,14 @@ void Person::destroy() {
     setDead();
     world()->playSound(m_infection >= 500 ? m_sound_infect : m_sound_flame);
     world()->increaseScore(m_score_value);
-    if (m_infection >= 500 && world()->distPenelope(getX(), getY()) != 0) world()->createZombie(getX(), getY());
+    if (m_infection >= 500 && world()->distPenelope(getX(), getY()) != 0) {
+        if (randInt(1, 10) <= 3)
+            world()->addActor(new Zombie(getX(), getY(), world()));
+        else
+            world()->addActor(new SmartZombie(getX(), getY(), world()));
+    }
     if (!infectable() && m_score_value == 1000 && randInt(1, 10) == 1)
-        world()->createVaccine(getX(), getY());
+        world()->addActor(new VaccineGoodie(getX(), getY(), world()));
 }
 bool Person::moveDirection(Direction dir) {
     int x = getX();
@@ -221,25 +226,25 @@ void Penelope::doAction() {
                         case GraphObject::right:
                             for (int i = 1; i <= 3; i++) {
                                 if (world()->projectileBlocked(getX() + SPRITE_WIDTH*i, getY())) return;
-                                world()->createFlame(getX()+SPRITE_WIDTH*i, getY(), GraphObject::right);
+                                world()->addActor(new Flame(getX()+SPRITE_WIDTH*i, getY(), GraphObject::right, world()));
                             }
                             break;
                         case GraphObject::left:
                             for (int i = 1; i <= 3; i++) {
                                 if (world()->projectileBlocked(getX() - SPRITE_WIDTH*i, getY())) return;
-                                world()->createFlame(getX()-SPRITE_WIDTH*i, getY(), GraphObject::left);
+                                world()->addActor(new Flame(getX()-SPRITE_WIDTH*i, getY(), GraphObject::right, world()));
                             }
                             break;
                         case GraphObject::up:
                             for (int i = 1; i <= 3; i++) {
                                 if (world()->projectileBlocked(getX(), getY() + SPRITE_HEIGHT*i)) return;
-                                world()->createFlame(getX(), getY()+SPRITE_HEIGHT*i, GraphObject::up);
+                                world()->addActor(new Flame(getX(), getY()+SPRITE_HEIGHT*i, GraphObject::up, world()));
                             }
                             break;
                         case GraphObject::down:
                             for (int i = 1; i <= 3; i++) {
                                 if (world()->projectileBlocked(getX(), getY() - SPRITE_HEIGHT*i)) return;
-                                world()->createFlame(getX(), getY()-SPRITE_HEIGHT*i, GraphObject::down);
+                                world()->addActor(new Flame(getX(), getY()-SPRITE_HEIGHT*i, GraphObject::down, world()));
                             }
                     }
                 }
@@ -247,7 +252,7 @@ void Penelope::doAction() {
             case KEY_PRESS_TAB:
                 if (m_landmines > 0) {
                     m_landmines--;
-                    world()->createLandmine(getX(), getY());
+                    world()->addActor(new Landmine(getX(), getY(), world()));
                 }
                 break;
             case KEY_PRESS_ENTER:
@@ -369,7 +374,7 @@ bool Zombie::vomit() {
             vomitY -= SPRITE_HEIGHT;
     }
     if (world()->overlapInfectable(vomitX, vomitY) && randInt(1,3) == 1) {
-        world()->createVomit(vomitX, vomitY, getDirection());
+        world()->addActor(new Vomit(vomitX, vomitY, getDirection(), world()));
         world()->playSound(SOUND_ZOMBIE_VOMIT);
         return true;
     }
