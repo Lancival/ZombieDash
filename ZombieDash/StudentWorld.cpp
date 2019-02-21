@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include <climits>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath) {return new StudentWorld(assetPath);}
