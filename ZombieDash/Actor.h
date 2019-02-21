@@ -16,17 +16,17 @@ public:
     Actor(int imageID, int startX, int startY, Direction startDirection, int depth, StudentWorld* stWorld);
     
     // Properties
-    virtual bool flammable() const; // Default of true (can be destroyed by flames)
-    virtual bool infectable() const; // Default of false (cannot be infected by vomit)
-    virtual bool blocksMovement() const; // Default of false (blocks other actors from moving onto it)
+    virtual bool flammable() const;         // Default of true (can be destroyed by flames)
+    virtual bool infectable() const;        // Default of false (cannot be infected by vomit)
+    virtual bool blocksMovement() const;    // Default of false (blocks other actors from moving onto it)
     virtual bool blocksProjectiles() const; // Default of false (blocks flames and vomit)
-    virtual bool pitDestructible() const; // Default of false (cannot be destroyed by a pit)
+    virtual bool pitDestructible() const;   // Default of false (cannot be destroyed by a pit)
     
     // Accessors
     bool alive() const; // Returns whether this actor is alive
     
-    // Actions
-    void setDead(); // Directly sets state of actor to dead
+    // Mutators
+    void setDead();         // Directly sets state of actor to dead
     virtual void destroy(); // Destroys actor as if by destroyed by fire
     virtual void doSomething() = 0;
     virtual void infect();
@@ -58,10 +58,10 @@ public:
     Wall(int startX, int startY, StudentWorld* stWorld);
     
     // Properties
-    virtual bool blocksMovement() const; // Walls do block movement
+    virtual bool blocksMovement() const;    // Walls do block movement
     virtual bool blocksProjectiles() const; // Walls do block projectiles
     
-    // Actions
+    // Mutators
     virtual void doSomething(); // Do nothing
 };
 
@@ -74,8 +74,8 @@ public:
     // Properties
     virtual bool blocksProjectiles() const; // Exits do block projectiles
     
-    // Actions
-    virtual void doSomething();
+    // Mutators
+    virtual void doSomething(); // Make overlapping citizens and Penelope exit
 };
 
 // Pit Class Declaration
@@ -84,8 +84,8 @@ public:
     // Constructor
     Pit(int startX, int startY, StudentWorld* stWorld);
     
-    // Actions
-    virtual void doSomething();
+    // Mutators
+    virtual void doSomething(); // Destroy overlapping pit-destructible actors
 };
 
 /* Projectile Class Declaration
@@ -100,13 +100,13 @@ public:
     // Properties
     virtual bool flammable() const; // Projectiles are not flammable
     
-    // Actions
+    // Mutators
     virtual void doSomething(); // Infect or destroy infectable or destructible actors
 protected:
     // Accessors
     int ticksLeft() const; // Returns number of ticks left until destruction
     
-    // Actions
+    // Mutators
     void decTicks(); // Decrements number of ticks left until destruction
     virtual void affect() = 0; // Implementation of infection/destruction
 private:
@@ -119,7 +119,7 @@ public:
     // Constructor
     Flame(int startX, int startY, Direction startDirection, StudentWorld* stWorld);
 protected:
-    // Actions
+    // Mutators
     virtual void affect(); // Destroy destructible actors
 };
 
@@ -129,7 +129,7 @@ public:
     // Constructor
     Vomit(int startX, int startY, Direction startDirection, StudentWorld* stWorld);
 protected:
-    // Actions
+    // Mutators
     virtual void affect(); // Infect infectable actors
 };
 
@@ -143,10 +143,10 @@ public:
     // Constructor
     Goodie(int imageID, int startX, int startY, StudentWorld* stWorld);
     
-    // Actions
+    // Mutators
     virtual void doSomething(); // Detect if goodie was picked up by Penelope
 protected:
-    // Actions
+    // Mutators
     virtual void receiveGoodies() = 0; // Increase the appropriate portion of Penelope's inventory
     void playGoodieSound(); // Play SOUND_GOT_GOODIE
 };
@@ -157,7 +157,7 @@ public:
     // Constructor
     VaccineGoodie(int startX, int startY, StudentWorld* stWorld);
 protected:
-    // Actions
+    // Mutators
     virtual void receiveGoodies(); // Increase Penelope's number of vaccines by 1
 };
 
@@ -167,7 +167,7 @@ public:
     // Constructor
     GasCanGoodie(int startX, int startY, StudentWorld* stWorld);
 protected:
-    // Actions
+    // Mutators
     virtual void receiveGoodies(); // Increase Penelope's number of flamethrower chargers by 5
 };
 
@@ -177,7 +177,7 @@ public:
     // Constructor
     LandmineGoodie(int startX, int startY, StudentWorld* stWorld);
 protected:
-    // Actions
+    // Mutators
     virtual void receiveGoodies(); // Increase Penelope's number of landmines by 2
 };
 
@@ -192,15 +192,15 @@ public:
     Landmine(int startX, int startY, StudentWorld* stWorld);
     
     // Accessors
-    int safetyTicks() const; // Return the number of safety ticks remaining
-    bool active() const; // Return whether the landmine is active
+    int safetyTicks() const;    // Return the number of safety ticks remaining
+    bool active() const;        // Return whether the landmine is active
     
-    // Actions
-    virtual void destroy(); // Sets state to dead and creates flames and a pit
+    // Mutators
+    virtual void destroy();     // Sets state to dead and creates flames and a pit
     virtual void doSomething(); // Detects whether the landmine has been stepped upon
 private:
-    int m_safetyTicks; // Number of safety ticks remaining
-    bool m_active; // Whether the landmine is active
+    int m_safetyTicks;  // Number of safety ticks remaining
+    bool m_active;      // Whether the landmine is active
 };
 
 /* Person Class Declaration
@@ -214,32 +214,32 @@ public:
     Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value, int step_distance);
     
     // Properties
-    virtual bool blocksMovement() const; // People block movement
-    virtual bool pitDestructible() const; // People can be destroyed by pits
+    virtual bool blocksMovement() const;    // People block movement
+    virtual bool pitDestructible() const;   // People can be destroyed by pits
     
     // Accessors
     int infection() const; // Returns number of ticks this person has been infected
     
-    // Actions
+    // Mutators
     virtual void doSomething(); // Checks if turned into zombie, then call doAction()
-    virtual void destroy(); // People play a sound and change Penelope's score when destroyed
-    virtual void infect(); // Infects this person
-    void resetInfection(); // Uninfects this person
+    virtual void destroy();     // People play a sound and change Penelope's score when destroyed
+    virtual void infect();      // Infects this person
+    void resetInfection();      // Uninfects this person
 protected:
     // Accessors
     bool infected() const; // Returns whether this person has been infected by vomit
     
-    // Actions
+    // Mutators
     virtual void doAction() = 0; // Makes this person do some action
     virtual bool paralyzed(); // Returns whether this person is paralyzed with indecision
     bool moveDirection(Direction dir); // Attempts to move in Direction dir, returns whether move was successful
 private:
-    bool m_infected; // Whether this person has been infected by vomit, always false for zombies
-    int m_infection; // Number of ticks person has been infected, always 0 for zombies
-    int m_score_value; // Number of points awarded/deducted when this person is destroyed
-    int m_sound_infect; // Sound to be played when this person is destroyed by infection
-    int m_sound_flame; // Sound to be played when this person is destroyed by flames
-    bool m_paralyzed; // Whether this person is paralyzed with indecision
+    bool m_infected;     // Whether this person has been infected by vomit, always false for zombies
+    bool m_paralyzed;    // Whether this person is paralyzed with indecision
+    int m_infection;     // Number of ticks person has been infected, always 0 for zombies
+    int m_score_value;   // Number of points awarded/deducted when this person is destroyed
+    int m_sound_infect;  // Sound to be played when this person is destroyed by infection
+    int m_sound_flame;   // Sound to be played when this person is destroyed by flames
     int m_step_distance; // How far this person moves in a single tick
 };
 
@@ -258,22 +258,22 @@ public:
     virtual bool infectable() const; // Penelope is infectable
     
     // Accessors
-    int landmines() const; // Returns the number of landmines carried by Penelope
-    int flameCharges() const; // Returns the number of flamethrower charges carried by Penelope
-    int vaccines() const; // Returns the number of vaccines carried by Penelope
+    int landmines() const;      // Returns the number of landmines carried by Penelope
+    int flameCharges() const;   // Returns the number of flamethrower charges carried by Penelope
+    int vaccines() const;       // Returns the number of vaccines carried by Penelope
     
-    // Actions
-    void adjustLandmines(int num); // Changes the number of landmines carried by Penelope by num
-    void adjustFlameCharges(int num); // Changes the number of flamethrower charges carried by Penelope by num
-    void adjustVaccines(int num); // Changes the number of vaccines carried by Penelope
+    // Mutators
+    void adjustLandmines(int num);      // Changes the number of landmines carried by Penelope by num
+    void adjustFlameCharges(int num);   // Changes the number of flamethrower charges carried by Penelope by num
+    void adjustVaccines(int num);       // Changes the number of vaccines carried by Penelope
 protected:
-    // Actions
-    virtual void doAction(); // Detects user input and has Penelope act accordingly
-    virtual bool paralyzed(); // Penelope is never paralyzed with indecision!
+    // Mutators
+    virtual void doAction();    // Detects user input and has Penelope act accordingly
+    virtual bool paralyzed();   // Penelope is never paralyzed with indecision!
 private:
-    int m_landmines; // Number of landmines carried by Penelope
+    int m_landmines;    // Number of landmines carried by Penelope
     int m_flameCharges; // Number of flamethrower charges carried by Penelope
-    int m_vaccines; // Number of vaccines carried by Penelope
+    int m_vaccines;     // Number of vaccines carried by Penelope
 };
 
 /* Citizen Class Declaration
@@ -288,10 +288,10 @@ public:
     // Properties
     virtual bool infectable() const; // Citizens are infectable
     
-    // Actions
+    // Mutators
     virtual void infect(); // Citizens also play an infection sound when infected
 protected:
-    // Actions
+    // Mutators
     virtual void doAction(); // Citizens follow Penelope and run from zombies
 };
 
@@ -306,13 +306,13 @@ public:
     Zombie(int startX, int startY, StudentWorld* stWorld, int score_value = 1000);
     
 protected:
-    // Actions
-    virtual void doAction(); // Zombies have common movement behaviors
-    virtual void movementPlan(); // Zombies create movement plans
+    // Mutators
+    virtual void doAction();        // Zombies have common movement behaviors
+    virtual void movementPlan();    // Zombies create movement plans
 private:
     int m_movementPlan; // Distance to travel in current direction
     
-    // Actions
+    // Mutators
     bool vomit(); // Zombies will vomit on nearby people
 };
 
@@ -327,7 +327,7 @@ public:
     // Constructor
     SmartZombie(int startX, int startY, StudentWorld* stWorld);
 protected:
-    // Actions
+    // Mutators
     virtual void movementPlan(); // Smart zombies have a different way of creating movement plans
 };
 

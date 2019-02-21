@@ -101,7 +101,8 @@ void Landmine::doSomething() {
         if (--m_safetyTicks == 0) m_active = true;
         return;
     }
-    if (world()->overlapPitDestructable(getX(), getY())) destroy();
+    if (world()->overlapOfType(getX(), getY(), &Actor::pitDestructible))
+        destroy();
 }
 void Landmine::destroy() {
     // Set state of landmine to dead
@@ -373,7 +374,7 @@ bool Zombie::vomit() {
         case GraphObject::down:
             vomitY -= SPRITE_HEIGHT;
     }
-    if (world()->overlapInfectable(vomitX, vomitY) && randInt(1,3) == 1) {
+    if (world()->overlapOfType(vomitX, vomitY, &Actor::infectable) && randInt(1,3) == 1) {
         world()->addActor(new Vomit(vomitX, vomitY, getDirection(), world()));
         world()->playSound(SOUND_ZOMBIE_VOMIT);
         return true;

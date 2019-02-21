@@ -139,9 +139,9 @@ void StudentWorld::cleanUp() {
 void StudentWorld::addActor(Actor* newActor) {m_actors.push_back(newActor);}
 
 // Goodie Adjustment Helper Functions
-void StudentWorld::adjustLandmines(int num) {m_penelope->adjustLandmines(num);}
-void StudentWorld::adjustFlameCharges(int num) {m_penelope->adjustFlameCharges(num);}
-void StudentWorld::adjustVaccines(int num) {m_penelope->adjustVaccines(num);}
+void StudentWorld::adjustLandmines(const int num) {m_penelope->adjustLandmines(num);}
+void StudentWorld::adjustFlameCharges(const int num) {m_penelope->adjustFlameCharges(num);}
+void StudentWorld::adjustVaccines(const int num) {m_penelope->adjustVaccines(num);}
 
 bool StudentWorld::boundaryBoxIntersect(int x1, int y1, int x2, int y2) const {
     if (abs(x1-x2) < SPRITE_WIDTH-1 && abs(y1-y2) < SPRITE_HEIGHT-1)
@@ -149,7 +149,7 @@ bool StudentWorld::boundaryBoxIntersect(int x1, int y1, int x2, int y2) const {
     return false;
 }
 
-bool StudentWorld::isValidDestination(int x, int y, Actor* actor) const {
+bool StudentWorld::isValidDestination(const int x, const int y, const Actor* actor) const {
     if (actor != m_penelope)
         if (boundaryBoxIntersect(x, y, m_penelope->getX(), m_penelope->getY()))
             return false;
@@ -195,7 +195,7 @@ bool StudentWorld::overlapGoodie(int x, int y) const {
     return overlap(x, y, m_penelope->getX(), m_penelope->getY());
 }
 
-bool StudentWorld::projectileBlocked(int x, int y) {
+bool StudentWorld::projectileBlocked(const int x, const int y) const {
     for (int i = 0; i < m_actors.size(); i++)
         if (m_actors[i]->alive() && m_actors[i]->blocksProjectiles())
             if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
@@ -204,7 +204,7 @@ bool StudentWorld::projectileBlocked(int x, int y) {
 }
 
 // Destroy Actor Functions
-void StudentWorld::destroyOfType(int x, int y, bool (Actor::*property)() const) {
+void StudentWorld::destroyOfType(const int x, const int y, bool (Actor::*property)() const) {
     if (m_penelope->alive() && (m_penelope->*property)() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
         m_penelope->destroy();
     for (int i = 0; i < m_actors.size(); i++)
@@ -213,23 +213,13 @@ void StudentWorld::destroyOfType(int x, int y, bool (Actor::*property)() const) 
                 m_actors[i]->destroy();
 }
 
-void StudentWorld::infectInfectables(int x, int y) {
+void StudentWorld::infectInfectables(const int x, const int y) {
     for (int i = 0; i < m_actors.size(); i++)
         if (m_actors[i]->alive() && m_actors[i]->infectable())
             if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
                 m_actors[i]->infect();
     if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
         m_penelope->infect();
-}
-
-bool StudentWorld::overlapPitDestructable(int x, int y) {
-    if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
-        return true;
-    for (int i = 0; i < m_actors.size(); i++)
-        if (m_actors[i]->alive() && m_actors[i]->pitDestructible())
-            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
-                return true;
-    return false;
 }
 
 double StudentWorld::distPenelope(int x, int y) const {return distance(x, y, m_penelope->getX(), m_penelope->getY());}
@@ -247,17 +237,7 @@ double StudentWorld::distZombie(int x, int y) const {
 int StudentWorld::penelopeX() const {return m_penelope->getX();}
 int StudentWorld::penelopeY() const {return m_penelope->getY();}
 
-bool StudentWorld::overlapInfectable(int x, int y) {
-    if (m_penelope->alive() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
-        return true;
-    for (int i = 0; i < m_actors.size(); i++)
-        if (m_actors[i]->alive() && m_actors[i]->infectable())
-            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
-                return true;
-    return false;
-}
-
-Direction StudentWorld::smartDirection(int x, int y) {
+Direction StudentWorld::smartDirection(const int x, const int y) const {
     Actor* target = m_penelope;
     int min = distPenelope(x, y);
     for (int i = 0; i < m_actors.size(); i++) {
@@ -286,12 +266,22 @@ Direction StudentWorld::smartDirection(int x, int y) {
     }
 }
 
-Direction StudentWorld::randDirection() {
+Direction StudentWorld::randDirection() const {
     switch (randInt(1,4)) {
         case 1: return(GraphObject::right);
         case 2: return(GraphObject::left);
         case 3: return(GraphObject::up);
         case 4: return(GraphObject::down);
     }
-    return GraphObject::right; // Will never be reached
+    return GraphObject::right;
+}
+
+bool StudentWorld::overlapOfType(const int x, const int y, bool (Actor::*property)() const) {
+    if (m_penelope->alive() && (m_penelope->*property)() && overlap(x, y, m_penelope->getX(), m_penelope->getY()))
+        return true;
+    for (int i = 0; i < m_actors.size(); i++)
+        if (m_actors[i]->alive() && (m_actors[i]->*property)())
+            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
+                return true;
+    return false;
 }
