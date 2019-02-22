@@ -27,6 +27,8 @@ int StudentWorld::init() {
     levelFileStream << setw(2) << getLevel() << ".txt";
     string levelFile = levelFileStream.str();
     
+    if (getLevel() == 100) return GWSTATUS_PLAYER_WON;
+    
     // Load the file
     Level::LoadResult result = level.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found) {
