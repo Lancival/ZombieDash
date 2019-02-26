@@ -119,7 +119,7 @@ int StudentWorld::move() {
         statusTextStream << "Score: " << setw(6) << getScore();
     statusTextStream << "  Level: " << getLevel();
     statusTextStream << "  Lives: " << getLives();
-    statusTextStream << "  Vacc: " << m_penelope->vaccines(); // Ask Professor Smallberg
+    statusTextStream << "  Vaccines: " << m_penelope->vaccines(); // Ask Professor Smallberg
     statusTextStream << "  Flames: " << m_penelope->flameCharges();
     statusTextStream << "  Mines: " << m_penelope->landmines();
     statusTextStream << "  Infected: " << m_penelope->infection();
@@ -194,16 +194,8 @@ void StudentWorld::exitPenelope(int x, int y) {
     m_levelComplete = true;
 }
 
-bool StudentWorld::overlapGoodie(int x, int y) const {
+bool StudentWorld::overlapGoodie(const int x, const int y) const {
     return overlap(x, y, m_penelope->getX(), m_penelope->getY());
-}
-
-bool StudentWorld::projectileBlocked(const int x, const int y) const {
-    for (int i = 0; i < m_actors.size(); i++)
-        if (m_actors[i]->alive() && m_actors[i]->blocksProjectiles())
-            if (overlap(x, y, m_actors[i]->getX(), m_actors[i]->getY()))
-                return true;
-    return false;
 }
 
 // Destroy Actor Functions
@@ -225,8 +217,8 @@ void StudentWorld::infectInfectables(const int x, const int y) {
         m_penelope->infect();
 }
 
-double StudentWorld::distPenelope(int x, int y) const {return distance(x, y, m_penelope->getX(), m_penelope->getY());}
-double StudentWorld::distZombie(int x, int y) const {
+double StudentWorld::distPenelope(const int x, const int y) const {return distance(x, y, m_penelope->getX(), m_penelope->getY());}
+double StudentWorld::distZombie(const int x, const int y) const {
     int min = INT_MAX;
     for (int i = 0; i < m_actors.size(); i++) {
         if (m_actors[i]->alive() && m_actors[i]->pitDestructible() && !m_actors[i]->infectable()) {

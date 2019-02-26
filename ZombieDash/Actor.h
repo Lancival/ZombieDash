@@ -19,7 +19,8 @@ public:
     virtual bool flammable() const;         // Default of true (can be destroyed by flames)
     virtual bool infectable() const;        // Default of false (cannot be infected by vomit)
     virtual bool blocksMovement() const;    // Default of false (blocks other actors from moving onto it)
-    virtual bool blocksProjectiles() const; // Default of false (blocks flames and vomit)
+    virtual bool blocksFlames() const; // Default of false (does not block flames)
+    virtual bool blocksVomit() const; // Default of same thing as blocksFlames()
     virtual bool pitDestructible() const;   // Default of false (cannot be destroyed by a pit)
     
     // Accessors
@@ -59,7 +60,7 @@ public:
     
     // Properties
     virtual bool blocksMovement() const;    // Walls do block movement
-    virtual bool blocksProjectiles() const; // Walls do block projectiles
+    virtual bool blocksFlames() const; // Walls do block projectiles
     
     // Mutators
     virtual void doSomething(); // Do nothing
@@ -72,7 +73,8 @@ public:
     Exit(int startX, int startY, StudentWorld* stWorld);
     
     // Properties
-    virtual bool blocksProjectiles() const; // Exits do block projectiles
+    virtual bool blocksFlames() const; // Exits do block projectiles
+    virtual bool blocksVomit() const; // Exits do not block vomit
     
     // Mutators
     virtual void doSomething(); // Make overlapping citizens and Penelope exit
@@ -103,11 +105,7 @@ public:
     // Mutators
     virtual void doSomething(); // Infect or destroy infectable or destructible actors
 protected:
-    // Accessors
-    int ticksLeft() const; // Returns number of ticks left until destruction
-    
     // Mutators
-    void decTicks(); // Decrements number of ticks left until destruction
     virtual void affect() = 0; // Implementation of infection/destruction
 private:
     int m_ticksLeft; // Number of ticks left until destruction
@@ -148,7 +146,6 @@ public:
 protected:
     // Mutators
     virtual void receiveGoodies() = 0; // Increase the appropriate portion of Penelope's inventory
-    void playGoodieSound(); // Play SOUND_GOT_GOODIE
 };
 
 // VaccineGoodie Class Declaration
@@ -191,10 +188,6 @@ public:
     // Constructor
     Landmine(int startX, int startY, StudentWorld* stWorld);
     
-    // Accessors
-    int safetyTicks() const;    // Return the number of safety ticks remaining
-    bool active() const;        // Return whether the landmine is active
-    
     // Mutators
     virtual void destroy();     // Sets state to dead and creates flames and a pit
     virtual void doSomething(); // Detects whether the landmine has been stepped upon
@@ -227,7 +220,7 @@ public:
     void resetInfection();      // Uninfects this person
 protected:
     // Accessors
-    bool infected() const; // Returns whether this person has been infected by vomit
+    bool infected() const; // Returns whether this person is infected
     
     // Mutators
     virtual void doAction() = 0; // Makes this person do some action

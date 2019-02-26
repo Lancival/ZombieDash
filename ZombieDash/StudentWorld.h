@@ -33,12 +33,11 @@ public:
     void exitPenelope(const int x, const int y); // Detects and handles whether Penelope has completed the level
     
     // Accessors
-    bool overlapOfType(const int x, const int y, bool (Actor::*propery)() const); // Returns whether an actor satisfying the given property overlaps with (x, y)
-    bool overlapGoodie(int x, int y) const; // Returns whether Penelope overlaps with a goodie at (x, y)
+    bool overlapOfType(const int x, const int y, bool (Actor::*property)() const); // Returns whether an actor satisfying the given property overlaps with (x, y)
+    bool overlapGoodie(const int x, const int y) const; // Returns whether Penelope overlaps with a goodie at (x, y)
     bool isValidDestination(const int x, const int y, const Actor* actor) const; // Returns whether moving to the specified location is allowed
-    bool projectileBlocked(const int x, const int y) const; // Returns whether a projectile would be blocked by a wall or exit at (x, y)
-    double distPenelope(int x, int y) const; // Returns the distance to Penelope from (x, y)
-    double distZombie(int x, int y) const; // Returns the distance to the nearest zombie from (x, y)
+    double distPenelope(const int x, const int y) const; // Returns the distance to Penelope from (x, y)
+    double distZombie(const int x, const int y) const; // Returns the distance to the nearest zombie from (x, y)
     int penelopeX() const; // Returns the x-coordinate of Penelope
     int penelopeY() const; // Returns the y-coordinate of Penelope
     Direction smartDirection(const int x, const int y) const; // Returns the direction a smart zombie should head from (x, y)
