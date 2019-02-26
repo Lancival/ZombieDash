@@ -147,7 +147,10 @@ void Person::doSomething() {
 }
 void Person::destroy() {
     setDead();
-    world()->playSound(m_infection >= 500 ? m_sound_infect : m_sound_flame);
+    if (m_infection >= 500 && m_sound_infect != SOUND_NONE)
+        world()->playSound(m_sound_infect);
+    else if (m_sound_flame != SOUND_NONE)
+        world()->playSound(m_sound_flame);
     world()->increaseScore(m_score_value);
     if (m_infection >= 500 && world()->distPenelope(getX(), getY()) != 0) {
         if (randInt(1, 10) <= 3)
@@ -390,9 +393,11 @@ bool Zombie::vomit() {
             vomitY -= SPRITE_HEIGHT;
     }
     if (world()->overlapOfType(vomitX, vomitY, &Actor::infectable) && randInt(1,3) == 1) {
-        world()->addActor(new Vomit(vomitX, vomitY, getDirection(), world()));
-        world()->playSound(SOUND_ZOMBIE_VOMIT);
-        return true;
+        if (!world()->overlapOfType(vomitX, vomitY, &Actor::blocksVomit)) {
+            world()->addActor(new Vomit(vomitX, vomitY, getDirection(), world()));
+            world()->playSound(SOUND_ZOMBIE_VOMIT);
+            return true;
+        }
     }
     return false;
 }

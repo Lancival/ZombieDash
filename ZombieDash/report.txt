@@ -4,7 +4,7 @@
 StudentWorld Functions
 ----------------------
 StudentWorld(std::string assetPath)
-    The constructor constructs a new StudenWorld object with an empty list of Actor
+    The constructor constructs a new StudentWorld object with an empty list of Actor
     pointers and a null pointer to Penelope.
 
 ~StudentWorld()
@@ -15,66 +15,85 @@ StudentWorld(std::string assetPath)
 virtual int init()
     This function loads information from the level data file. This function is virtual
     since it is declared as such in the GameWorld class from which the StudentWorld class
-    inherits from.
+    inherits from. This function is present in StudentWorld since it is required by the
+    spec and it must be implemented so that StudentWorld is not an abstract class.
 
 virtual int move()
     This functions makes each actor do something, and then deletes dead actors. This
     function is virtual since it is declared as such in the GameWorld class from which
-    the StudentWorld class inherits from.
+    the StudentWorld class inherits from. This function is present in StudentWorld since
+    it is required by the spec and it must be implemented so that StudentWorld is not an
+    abstract class.
 
 virtual void cleanUp()
     This function deletes all actors, including Penelope, and sets Penelope's pointer to
     the null pointer so that this function can be called multiple times in a row without
     adverse effects. This function is virtual since it is declared as such in the
-    GameWorld class from which the StudentWorld class inherits from.
+    GameWorld class from which the StudentWorld class inherits from. This function is
+    present in StudentWorld since it is required by the spec and it must be implemented so
+    that StudentWorld is not an abstract class.
 
 void addActor(Actor* newActor)
     This function takes a pointer to a newly constructed Actor and adds it to the vector
     of Actors. This function is not virtual since no classes need to inherit from
-    StudentWorld.
+    StudentWorld. This function is in the StudentWorld class so that Actors may tell the
+    StudentWorld to instantiate new Actors.
 
 void destroyOfType(const int x, const int y, bool (Actor::*property)() const)
     This function takes a location (x,y) and a function pointer to an Actor property and
     destroys all Actors that overlap that location, are alive(), and satisfy the given
     property. This allows Actors such as flames and pits to destroy flammable() and
     pitDestructible() actors at their location. This function is not virtual since no
-    classes need to inherit from StudentWorld.
+    classes need to inherit from StudentWorld. This function is in the StudentWorld class
+    so that Actors may tell the StudentWorld to destroy certain types of Actors
+    overlapping a location.
 
 void infectInfectables(const int x, const int y)
     This function takes a location (x,y) and calls each Actor's infect() if that Actor
     is alive() and infectable(), including Penelope. This function is not virtual since no
-    classes need to inherit from StudentWorld.
+    classes need to inherit from StudentWorld. This function is in the StudentWorld class
+    so that Vomits can tell StudentWorld to infect nearby infectable Actors.
 
 void adjustLandmines(const int num)
     This function adjusts the number of landmines Penelope is carrying by the number
     provided, by calling Penelope::adjustLandmines(). This function is not virtual since
-    no classes need to inherit from StudentWorld.
+    no classes need to inherit from StudentWorld. This function is in the StudentWorld
+    class so that StudentWorld can tell Penelope to change the number of landmines she is
+    carrying.
 
 void adjustFlameCharges(const int num)
     This function adjusts the number of flamethrower charges Penelope is carrying by the
     number provided, by calling Penelope::adjustFlameCharges(). This function is not
-    virtual since no classes need to inherit from StudentWorld.
+    virtual since no classes need to inherit from StudentWorld. This function is in the
+    StudentWorld class so that StudentWorld can tell Penelope to change the number of
+    flamethrower charges she has.
 
 void adjustVaccines(const int num)
     This function adjusts the number of vaccines Penelope is carrying by the number
     provided, by calling Penelope::adjustVaccines(). This function is not virtual since no
-    classes need to inherit from StudentWorld.
+    classes need to inherit from StudentWorld. This function is in the StudentWorld
+    class so that StudentWorld can tell Penelope to change the number of landmines she is
+    carrying.
 
 void exitCitizens(const int x, const int y)
     This function iterates over all Actors and causes any citizens overlapping (x,y) to
     exit. This function is not virtual since no classes need to inherit from StudentWorld.
+    This function is in StudentWorld so that Exits can tell the StudentWorld to make
+    Citizens exit.
 
 void exitPenelope(const int x, const int y)
     This function checks whether Penelope overlaps the location (x,y). If so, it causes
     her to exit, thus completing the level. This function is not virtual since no classes
-    need to inherit from StudentWorld.
+    need to inherit from StudentWorld. This function is in StudentWorld so that Exits can
+    tell the StudentWorld to make Penelope exit.
 
 bool overlapOfType(const int x, const int y, bool (Actor::*property)() const)
     This function iterates over all actors, and returns whether an actor satisfying the
     given property overlaps with (x,y). For example, this is used by zombies when
     determining whether to vomit by checking whether there is a infectable() Actor at the
     vomit location. This function is not virtual since no classes need to inherit from
-    StudentWorld.
+    StudentWorld. This function is in StudentWorld class so that Actors can check whether
+    they would overlap Actors of a certain type.
 
 bool overlapGoodie(const int x, const int y) const
     This function returns whether Penelope overlaps (x,y). As the function name implies,
@@ -82,39 +101,52 @@ bool overlapGoodie(const int x, const int y) const
     could have been combined with overlapOfType above, but I felt that it would be bad
     design to have all Actors contain a isPenelope() function to be passed into
     overlapOfType(). This function is not virtual since no classes need to inherit from
-    StudentWorld.
+    StudentWorld. This function is in the StudentWorld class so that Goodies can check
+    whether Penelope overlaps their location.
 
 bool isValidDestination(const int x, const int y, const Actor* actor) const
     This function checks whether the location (x,y) overlaps any blocksMovement() actors,
     other than the Actor whose pointer is passed in (since an Actor would not block its
     own movement), thus determining whether (x,y) would be a valid movement destination.
-    This function is not virtual since no classes need to inherit from StudentWorld.
+    This function is not virtual since no classes need to inherit from StudentWorld. This
+    function is in the StudentWorld class so that Actors can check whether their movement
+    destination would overlap with an Actor that blocks movement.
 
 double distPenelope(const int x, const int y) const
     This function calculates and returns the distance to Penelope from (x,y). This
-    function is not virtual since no classes need to inherit from StudentWorld.
+    function is not virtual since no classes need to inherit from StudentWorld. This
+    function is in the StudentWorld class so that Actors can check their distance from
+    Penelope.
 
 double distZombie(const int x, const int y) const
     This function calculates and returns the distance to the nearest zombie from (x,y).
-    This function is not virtual since no classes need to inherit from StudentWorld.
+    This function is not virtual since no classes need to inherit from StudentWorld. This
+    function is in the StudentWorld class so that Citizens can check their distance to the
+    nearest zombie.
 
 int penelopeX() const
     This function returns the current x-coordinate of Penelope. This function is not
-    virtual since no classes need to inherit from StudentWorld.
+    virtual since no classes need to inherit from StudentWorld. This function is in the
+    StudentWorld class so that Actors can check where Penelope is.
 
 int penelopeY() const
     This function returns the current y-coordinate of Penelope. This function is not
-    virtual since no classes need to inherit from StudentWorld.
+    virtual since no classes need to inherit from StudentWorld. This function is in the
+    StudentWorld class so that Actors can check where Penelope is.
 
 Direction smartDirection(const int x, const int y) const
     This function returns the direction a smart zombie should head from (x,y) by
     returning the direction towards the nearest infectable(), or if the nearest
     infectable() is more than 80 pixels away, returning the result of randDirection().
     This function is not virtual since no classes need to inherit from StudentWorld.
+    This function is in StudentWorld so that SmartZombies can query which direction they
+    should head without querying the locations of each infectable Actor.
 
 Direction randDirection() const
     This function returns a random direction. This function is not virtual since no
-    classes need to inherit from StudentWorld.
+    classes need to inherit from StudentWorld. This function is in the StudentWorld class
+    so that Actors can get a random direction (and so that smartDirection() can default to
+    randDirection() when no infectable Actor is less than 80 pixels away).
 
 Actor Functions
 ---------------
@@ -126,54 +158,69 @@ Actor(int imageID, int startX, int startY, Direction startDirection, int depth,
 virtual bool flammable() const
     This function returns whether this Actor can be destroyed by flames. This function is
     virtual since it provides a default return value of true, but allows Actors such as
-    Walls to override the default implementation with their own implementation.
+    Walls to override the default implementation with their own implementation. This
+    function is in the Actor class since the StudentWorld class often needs to check
+    whether a generic Actor is flammable.
 
 virtual bool infectable() const
     This function returns whether this Actor can be infected by vomit. This function is
     virtual since it provides a default return value of false, but allows Actors such as
-    Persons to override the default implementation with their own implementation.
+    Persons to override the default implementation with their own implementation. This
+    function is in the Actor class since the StudentWorld class often needs to check
+    whether a generic Actor is infectable.
 
 virtual bool blocksMovement() const
     This function returns whether this Actor blocks the movement of other Actors. This
     function is virtual since it provides a default return value of false, but allows
     Actors such as Walls to override the default implementation with their own
-    implementation.
+    implementation. This function is in the Actor class since the StudentWorld class often
+    needs to check whether a generic Actor is blocks movement.
 
 virtual bool blocksFlames() const
     This function returns whether this Actor blocks Flames. This function is virtual
     since it provides a default return value of false, but allows Actors such as Walls to
-    override the default implementation with their own implementation.
+    override the default implementation with their own implementation. This function is in
+    the Actor class since the StudentWorld class often needs to check whether a generic
+    Actor is blocks flames.
 
 virtual bool blocksVomit() const
     This function returns whether this Actor blocks Vomit. This function is virtual since
     it provides a default return value of whatever blocksFlames() returns, but allows
     Actors such as Exits to override the default implementation with their own
-    implementation.
+    implementation. This function is in the Actor class since the StudentWorld class often
+    needs to check whether a generic Actor blocks Vomit.
 
 virtual bool pitDestructible() const
     This function returns whether this Actor can be destroyed by falling into a Pit. This
     function is virtual since it provides a default return value of false, but allows
     Actors such as Persons to override the default implementation with their own
-    implementation.
+    implementation. This function is in the Actor class since the StudentWorld class often
+    needs to check whether a generic Actor can fall into Pits.
 
 bool alive() const
     This function returns whether this Actor is alive. This function is not virtual since
     all actors determine whether they are alive in the same way - the value of m_alive.
+    This function is in the Actor class since all actors need to know whether they are
+    alive or dead.
 
 void setDead()
     This function sets m_alive to false, thus making this Actor dead. This function is not
-    virtual since all actors set their state to dead in the same way.
+    virtual since all actors set their state to dead in the same way. This function is in
+    the Actor class since all actors need to be able to set their own state to dead.
 
 virtual void destroy()
     This function destroys the Actor if they fell into a pit or were incinerated by a
     flame. This function is virtual since it provides a default implementation of only
     calling setDead(), but allows Actors such as Persons to override this default
-    implementation.
+    implementation. This function is in the Actor class since the StudentWorld class often
+    needs to destroy generic Actors and have those Actors respond appropriately by
+    themselves.
 
 virtual void doSomething()
     This function makes an Actor do something. This function is pure virtual since each
     type of Actor does different things, and there does not seem to be a logical "default"
-    implementation.
+    implementation. This function is in the Actor class since the StudentWorld needs to
+    make each Actor do something each tick.
 
 virtual void infect()
     This function infects the Actor. This function is virtual since it has a default
@@ -357,8 +404,134 @@ int infection() const
 virtual void doSomething()
     This function immediately returns if the Person is not alive. Otherwise, if the Person
     has been infected for more than 500 ticks, this function calls destroy(). Otherwise,
+    if the person is paralyzed (every other tick), the person does nothing. Otherwise,
+    this function calls doAction(), which is a virtual function that contains the unique
+    actions of each type of Person.
 
-// Checks if turned into zombie, then call doAction()
-virtual void destroy();     // People play a sound and change Penelope's score when destroyed
-virtual void infect();      // Infects this person
-void resetInfection();      // Uninfects this person
+virtual void destroy()
+    This function calls setDead(), and then checks whether the Person was destroyed by
+    flame or infection, and plays the appropriate sound. Then, the score is increased (or
+    possibly decreased) based on the score value of this person. Then, if the Person is
+    not Penelope, and was desroyed by infection, a new Zombie is added (with a 30% chance
+    of SmartZombie). Then, if the Person is a dumb zombie, the dumb zombie has a 10%
+    chance of spawning a VaccineGoodie at an adjacent location. This function is virtual
+    since it overrides the default implementation found in Actor.
+
+virtual void infect()
+    This function sets m_infected to true, so that this Person is infected. This function
+    is virtual because it overrides the default implementation found in Actor.
+
+void resetInfection()
+    This function uninfects a person by setting m_infected to true and m_infection to 0.
+    This function is not virtual since all Persons are uninfected in the same way. In
+    fact, this function is only ever called by Penelope on herself when a VaccineGoodie
+    is used, but is included in the Person class in case Nachengames ever decides to
+    include an update so that vaccines can be used on Citizens, or perhaps even Zombies.
+
+Penelope Functions
+------------------
+Penelope(int startX, int startY, StudentWorld* stWorld);
+    The Penelope constructor passes the imageID of IID_PLAYER, a step_distance of four
+    pixels, a score_value of 0, and sounds of SOUND_NONE for both sound_infect and
+    sound_flame along with the input to the Person constructor.
+
+virtual bool infectable() const
+    This function returns true, since Penelope is infectable. This function is virtual
+    because it overrides the default implementation found in Actor.
+
+int landmines() const
+    This function returns the number of landmines carried by Penelope, m_landmines. This
+    function is not virtual because no classes need to inherit from Penelope.
+
+int flameCharges() const
+    This function returns whether the number of flamethrower charges Penelope has left,
+    m_flameCharges. This function is not virtual because no classes need to inherit
+    from Penelope.
+
+int vaccines() const
+    This function returns whether the number of vaccines Penelope is carrying, m_vaccines.
+    This function is not virtual because no classes need to inherit from Penelope.
+
+void adjustLandmines(int num)
+    This function changes the number of landmines carried by Penelope, m_landmines, by the
+    number provided. This function is not virtual because no classes need to inherit from
+    Penelope.
+
+void adjustFlameCharges(int num)
+    This function changes the number of flamethrower charges Penelope has left,
+    m_flameCharges, by the number provided. This function is not virtual because no
+    classes need to inherit from Penelope.
+
+void adjustVaccines(int num)
+    This function changes the number of vaccines Penelope is carrying, m_vaccines, by the
+    number provided. This function is not virtual because no classes need to inherit from
+    Penelope.
+
+Citizen Functions
+-----------------
+Citizen(int startX, int startY, StudentWorld* stWorld);
+    The Citizen constructor passes the imageID of IID_CITIZEN, SOUND_ZOMBIE_BORN as
+    sound_infect, SOUND_CITIZEN_DIE as sound_flame, a score value of -1000, and a step
+    distance of 2 along with the input to the Person constructor.
+
+virtual bool infectable() const
+    This function returns true, since Citizens are infectable. This function is virtual
+    because it overrides the default implementation found in Actor.
+
+virtual void infect()
+    This function set m_infected to true and plays SOUND_CITIZEN_INFECTED. This function
+    is virtual since it overrides the functions found in Actor and Person.
+
+Zombie Functions
+----------------
+Zombie(int startX, int startY, StudentWorld* stWorld, int score_value = 1000)
+    The Zombie constructor passes the imageID of IID_ZOMBIE, SOUND_NONE for sound_infect,
+    SOUND_ZOMBIE_DIE for sound_flame, and a step distance of 1 along with the input to the
+    Person constructor. If a score value is not provided, a default value of 1000 is
+    passed to the Person constructor. Note: Zombies can be constructed, as they have no
+    pure virtual functions. In fact, dumb zombies are Zombies, as SmartZombies simply
+    modify the default behavior of DumbZombies, rather than doing "different" things.
+
+SmartZombie Functions
+---------------------
+SmartZombie(int startX, int startY, StudentWorld* stWorld)
+    The SmartZombie constructor passes a score value of 2000 along with the input to the
+    Zombie constructor.
+
+------------------------------------------------------------------------------------------
+                         Incomplete Functionality and Known Bugs
+------------------------------------------------------------------------------------------
+I finished all functionality listed in the spec.
+
+Currently, there are no KNOWN bugs, but of course there will probably be unknown bugs
+that my testing has not revealed.
+
+------------------------------------------------------------------------------------------
+                            Design Decisions and Assumptions
+------------------------------------------------------------------------------------------
+The spec does not state whether Penelope should fall into a pit or exit if she overlaps a
+pit and an exit at the same time (such as if she foolishly set a landmine on top of the
+exit.) I chose to allow her to exit before falling into the pit.
+
+------------------------------------------------------------------------------------------
+                                        Testing
+------------------------------------------------------------------------------------------
+StudentWorld:
+Actor:
+Terrain:
+Wall:
+Exit:
+Pit:
+Projectile:
+Flame:
+Vomit:
+Goodie:
+VaccineGoodie:
+GasCanGoodie:
+LandmineGoodie:
+Landmine:
+Person:
+Penelope:
+Citizen:
+Zombie:
+SmartZombie:
