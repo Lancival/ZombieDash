@@ -518,20 +518,84 @@ exit.) I chose to allow her to exit before falling into the pit.
 ------------------------------------------------------------------------------------------
 StudentWorld:
 Actor:
+    I tested the Actor class by observing the behavior of its derived classes. I noted
+    that the default properties functioned correctly for derived classes which do not
+    override the default implementations. Also, all Actors are drawn correctly, showing
+    that Actor correctly inherits from GraphObject.
 Terrain:
+    I tested the Terrain class by observing the behavior of its derived classes. I noted
+    that all Terrain were correctly not destroyed by flames and drawn with an orientation
+    of right when created. I also tested that Terrain is an abstract class by attempting,
+    and correctly failing, to create a Terrain object.
 Wall:
+    I tested the Wall class by starting the game and noting that Walls appear in the
+    correct locations. The Walls also do not allow Zombies, Citizens, or Penelope to
+    intersect with their bounding boxes, and do not allow Vomit or Flames to be spawned
+    on top or beyond the Wall. The Walls also don't do anything else. I also observed that
+    my Walls correctly do not get destroyed by flames or infected by vomit.
 Exit:
+    I tested the Exit class by playing the game and observing that Citizens will use the
+    Exit when they overlap with it, but Penelope will not use the Exit until all Citizens
+    are dead or exited. Also, Exits block the formation of flames (as tested with the
+    flamethrower and landmine), but I was unable to entice a Zombie to vomit to test
+    whether Exits do not block Vomit. I also noted that Exits were not flammable, were not
+    infectable, and did not move.
 Pit:
+    I tested the Pit class by playing the game and noting that it correctly destroyed
+    overlapping Citizens, Zombies, and Penelope. I also observed that Pits do not block
+    movement or projectiles, and were not destructible.
 Projectile:
+    I tested the Projectile class by observing the behavior of its derived classes, Flame
+    and Vomit. In particular, all Projectiles were correctly not flammable and did not
+    block movement or other projectiles. Also, all Projectiles correctly destroyed
+    themselves after 2 ticks.
 Flame:
+    I tested the Flame class by playing the game and using the flamethrower and landmines.
+    Flames correctly destroy overlapping Zombies, Citizens, Goodies, Landmines, and
+    Penelope.
 Vomit:
+    I tested the Vomit class by playing the game and inducing zombies to Vomit on Penelope
+    and Citizens. I noted that Vomit correctly infects Citizens and Penelope.
 Goodie:
+    I tested the Goodie class by observing the behavior of its derived classes. In
+    particular, all Goodies correctly determine overlap with Penelope and are picked up
+    correctly. All goodies are also destroyed by flames and do not block movement, and
+    increase the score by 50.
 VaccineGoodie:
+    I tested the VaccineGoodie class by playing the game and picking up VaccineGoodies,
+    noting that it correctly increases the number of vaccines Penelope is carrying by 1.
 GasCanGoodie:
+    I tested the GasCanGoodie class by playing the game and picking up GasCanGoodies,
+    noting that it correctly increases the number of flamethrower charges Penelope has by
+    5.
 LandmineGoodie:
+    I tested the LandmineGoodie class by playing the game and picking up LandmineGoodies,
+    noting that it correctly increases the number of landmines Penelope is carrying by 2.
 Landmine:
+    I tested the Landmine class by playing the game and laying down Landmines. I verified
+    that Landmine triggers when a Penelope, Zombie, or Citizen walks over it, or when
+    destroyed by flame. I noted that Landmines correctly creates Flames and a Pit, and
+    don't trigger by walking over it until a short time after it is laid.
 Person:
+    I tested the Person class by observing the behavior of its derived classes. I noted
+    that all persons, other than Penelope, are paralyzed every other tick, and Penelope
+    and Citizens can be infected. I also noted that Persons move correctly (as functions
+    pertaining to movement patterns are included in Person rather than repeated in each
+    derived class.)
 Penelope:
+    I tested the Penelope class by playing the game. I noted that the controls works
+    correctly, and that Penelope can be infected, and that Penelope can fall into Pits,
+    and that Penelope can be destroyed by flames, etc. I also tested the Penelope can only
+    use her goodies when she has them, and is never paralyzed.
 Citizen:
+    I tested the Citizen class by playing the game and observing the Citizens. The
+    Citizens correctly follow Penelope and run away from zombies, and they correctly get
+    killed/destroyed in the appropriate ways.
 Zombie:
+    I tested the Zombie class by observing dumb zombies and the derived Smart Zombies. The
+    Zombies correctly vomit, get destroyed, and wander around. Dumb Zombies give the right
+    number of points and occasionally fling a VaccineGoodie upon death.
 SmartZombie:
+    I tested the SmartZombie class by observing the Smart Zombies. The SmartZombies
+    correctly copy the default behavior of dumb zombies, but also follow Citizens/Penelope
+    in an effort to infect them. They also give more points and don't drop VaccineGoodies.
