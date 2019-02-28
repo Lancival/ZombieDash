@@ -511,7 +511,13 @@ that my testing has not revealed.
 ------------------------------------------------------------------------------------------
 The spec does not state whether Penelope should fall into a pit or exit if she overlaps a
 pit and an exit at the same time (such as if she foolishly set a landmine on top of the
-exit.) I chose to allow her to exit before falling into the pit.
+exit.) I chose to allow her to exit before falling into the pit. I made a similar decision
+for Citizens.
+
+The spec was also not entirely clear what should happen how a citizen should move if it
+the furthest from any nearest zombie it can get is the same as the currently nearest
+zombie. I chose to interpret the spec such that the citizen would stay put in such a
+situation.
 
 ------------------------------------------------------------------------------------------
                                         Testing

@@ -153,7 +153,7 @@ void Person::destroy() {
         world()->playSound(m_sound_flame);
     world()->increaseScore(m_score_value);
     if (m_infection >= 500 && world()->distPenelope(getX(), getY()) != 0) {
-        if (randInt(1, 10) <= 3)
+        if (randInt(1, 10) <= 7)
             world()->addActor(new Zombie(getX(), getY(), world()));
         else
             world()->addActor(new SmartZombie(getX(), getY(), world()));
