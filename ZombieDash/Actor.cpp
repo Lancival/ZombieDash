@@ -90,7 +90,7 @@ LandmineGoodie::LandmineGoodie(int startX, int startY, StudentWorld* stWorld) : 
 void LandmineGoodie::receiveGoodies() {world()->adjustLandmines(2);}
 
 // Landmine Class Implementations
-Landmine::Landmine(int startX, int startY, StudentWorld* stWorld) : Actor(IID_LANDMINE, startX, startY, GraphObject::right, 1, stWorld), m_active(false), m_safetyTicks(30) {}
+Landmine::Landmine(int startX, int startY, StudentWorld* stWorld) : Actor(IID_LANDMINE, startX, startY, GraphObject::right, 1, stWorld), m_safetyTicks(30), m_active(false) {}
 void Landmine::doSomething() {
     if (!alive()) return;
     if (!m_active) {
@@ -129,7 +129,7 @@ void Landmine::destroy() {
     world()->addActor(new Pit(x, y, world()));
 }
 
-Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value, int step_distance) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_infection(0), m_sound_infect(sound_infect), m_sound_flame(sound_flame), m_score_value(score_value), m_paralyzed(false), m_step_distance(step_distance) {}
+Person::Person(int imageID, int startX, int startY, StudentWorld* stWorld, int sound_infect, int sound_flame, int score_value, int step_distance) : Actor(imageID, startX, startY, GraphObject::right, 0, stWorld), m_infected(false), m_paralyzed(false), m_infection(0), m_score_value(score_value), m_sound_infect(sound_infect), m_sound_flame(sound_flame), m_step_distance(step_distance) {}
 bool Person::blocksMovement() const {return true;}
 bool Person::pitDestructible() const {return true;}
 int Person::infection() const {return m_infection;}
